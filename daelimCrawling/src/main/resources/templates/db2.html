@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>연습중입니더</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We"
+          crossorigin="anonymous">
+</head>
+<body>
+	<table class="table" id="dataTable">
+	      <thead>
+	        <tr>
+	          <th scope="col">ACYEAR</th>
+	          <th scope="col">SLIPNO</th>
+	          <th scope="col">ACDATE</th>
+	          <th scope="col">ACCHKDT</th>
+	          <th scope="col">SLIPAMT</th>
+	          <th scope="col">BSNFLDCOD</th>
+	          <th scope="col">DEPTCOD</th>
+	          <th scope="col">ACEMPNO</th>
+	          <th scope="col">CASHCOLID</th>
+	          <th scope="col">CASHTRNFID</th>
+	          <th scope="col">HEADCOLID</th>
+	          <th scope="col">HEADBRANID</th>
+	          <th scope="col">ISSBSNCOD</th>
+	          <th scope="col">ISSDEPTCOD</th>
+	          <th scope="col">PRDCOLID</th>             
+	        </tr>
+	      </thead>
+	      <tbody>
+	        <tr th:each="item : ${list}">
+	                <td class="clickable" th:text="${item.ACYEAR}" data-slipno="${item.SLIPNO}" data-acdate="${item.ACDATE}"></td>
+	                <td class="clickable" th:text="${item.SLIPNO}" data-slipno="${item.SLIPNO}" data-acdate="${item.ACDATE}"></td>
+	                <td class="clickable" th:text="${item.ACDATE}" data-slipno="${item.SLIPNO}" data-acdate="${item.ACDATE}"></td>
+	                <td class="clickable" th:text="${item.ACCHKDT}" data-slipno="${item.SLIPNO}" data-acdate="${item.ACDATE}"></td>
+	                <td class="clickable" th:text="${item.SLIPAMT}" data-slipno="${item.SLIPNO}" data-acdate="${item.ACDATE}"></td>
+	                <td class="clickable" th:text="${item.BSNFLDCOD}" data-slipno="${item.SLIPNO}" data-acdate="${item.ACDATE}"></td>
+	                <td class="clickable" th:text="${item.DEPTCOD}" data-slipno="${item.SLIPNO}" data-acdate="${item.ACDATE}"></td>
+	                <td class="clickable" th:text="${item.ACEMPNO}" data-slipno="${item.SLIPNO}" data-acdate="${item.ACDATE}"></td>
+	                <td class="clickable" th:text="${item.CASHCOLID}" data-slipno="${item.SLIPNO}" data-acdate="${item.ACDATE}"></td>
+	                <td class="clickable" th:text="${item.CASHTRNFID}" data-slipno="${item.SLIPNO}" data-acdate="${item.ACDATE}"></td>
+	                <td class="clickable" th:text="${item.HEADCOLID}" data-slipno="${item.SLIPNO}" data-acdate="${item.ACDATE}"></td>
+	                <td class="clickable" th:text="${item.HEADBRANID}" data-slipno="${item.SLIPNO}" data-acdate="${item.ACDATE}"></td>
+	                <td class="clickable" th:text="${item.ISSBSNCOD}" data-slipno="${item.SLIPNO}" data-acdate="${item.ACDATE}"></td>
+	                <td class="clickable" th:text="${item.ISSDEPTCOD}" data-slipno="${item.SLIPNO}" data-acdate="${item.ACDATE}"></td>
+	                <td class="clickable" th:text="${item.PRDCOLID}" data-slipno="${item.SLIPNO}" data-acdate="${item.ACDATE}"></td>               
+	            </tr>
+	      </tbody>
+	    </table>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>대림통상 제품가격 크롤링</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            border: 1px solid #dee2e6;
+        }
+        th, td {
+            border: 1px solid #dee2e6;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f8f9fa;
+        }
+        .table-wrapper {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<div th:fragment="content" class="container mt-4"> <!-- Bootstrap 컨테이너 클래스 추가 -->
+	<div class="logo mb-4">
+	    <a href="http://localhost:8070/crawling/beforeSearch">
+	        <img src="/img/logo.JPG" alt="대림통상 로고">
+	    </a>
+	    <h2>제품가격 감시시스템</h2>
+	</div>
+    
+    <form id="mainForm" action="/crawling/afterSearch" method="get" class="mb-4"> <!-- Bootstrap 폼 클래스 추가 -->
+        <div class="form-check form-check-inline"> <!-- Bootstrap 인라인 폼 체크 클래스 추가 -->
+            <input type="radio" id="allSearch" name="searchType" value="all" class="form-check-input" checked>
+            <label for="allSearch" class="form-check-label">전체검색</label>
+        </div>
+        <div class="form-check form-check-inline"> <!-- Bootstrap 인라인 폼 체크 클래스 추가 -->
+            <input type="radio" id="naverSearch" name="searchType" value="naver" class="form-check-input">
+            <label for="naverSearch" class="form-check-label">네이버쇼핑</label>
+        </div>
+        <div class="form-check form-check-inline"> <!-- Bootstrap 인라인 폼 체크 클래스 추가 -->
+            <input type="radio" id="coupangSearch" name="searchType" value="coupang" class="form-check-input">
+            <label for="coupangSearch" class="form-check-label">쿠팡</label>
+        </div>
+      
+        <div class="mb-3 mt-3"> <!-- Bootstrap 마진 클래스 추가 -->
+            <label for="productCode" class="form-label">쇼핑몰 검색어 입력:</label>
+            <input type="text" id="productCode" name="productCode" class="form-control" placeholder="체크박스 검색 안쓸 때 쓰십시오">
+        </div>
+        <button type="submit" class="btn btn-primary">검색</button> <!-- Bootstrap 버튼 클래스 추가 -->
+        <button type="button" class="btn btn-secondary" onclick="clearInput()">지우기</button> <!-- Bootstrap 버튼 클래스 추가 -->
+    </form>     
+
+    <form id="searchCheckedForm" action="/crawling/searchChecked" method="post" class="mb-4"> <!-- Bootstrap 폼 클래스 추가 -->
+        <div class="table-wrapper">
+            <table class="table table-bordered" id="dataTable"> <!-- Bootstrap 테이블 클래스 추가 -->
+                <thead>
+                    <tr>
+                        <th scope="col"><input type="checkbox" id="selectAll" onclick="selectAllCheckboxes(this)"></th>
+                        <th scope="col">구분 인덱스</th>
+                        <th scope="col">검색대상 제품</th>
+                        <th scope="col">최저가격 설정</th>
+                    </tr>
+                </thead>  
+                <tbody>
+                    <tr th:each="item : ${list}">
+                        <td><input type="checkbox" class="rowCheckbox"></td>
+                        <td class="clickable" th:data-slipno="${item.index}" th:data-acdate="${item.index}" th:text="${item.index}">구분 인덱스</td>
+                        <td class="clickable" th:data-slipno="${item.name}" th:data-acdate="${item.name}" th:text="${item.name}">검색대상 제품</td>
+                        <td class="clickable" th:data-slipno="${item.price}" th:data-acdate="${item.price}" th:text="${item.price}">최저가격 설정</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-3">
+            <button type="button" class="btn btn-success" onclick="addRow()">데이터 추가</button> <!-- Bootstrap 버튼 클래스 추가 -->
+            <button type="button" class="btn btn-danger" onclick="deleteRow()">데이터 삭제</button> <!-- Bootstrap 버튼 클래스 추가 -->
+            <button type="button" class="btn btn-info" onclick="searchChecked()">선택항목 검색</button> <!-- Bootstrap 버튼 클래스 추가 -->
+        </div>
+
+        <div class="form-check form-switch mt-3"> <!-- Bootstrap 스위치 클래스 추가 -->
+            <input class="form-check-input" type="checkbox" id="autoSearchToggle">
+            <label class="form-check-label" for="autoSearchToggle">실시간 자동감시 활성화</label>
+        </div>
+        <div class="mt-2">
+            <label for="autoSearchInterval" class="form-label">자동감시 주기:</label>
+            <select id="autoSearchInterval" class="form-select w-auto"> <!-- Bootstrap 셀렉트 박스 클래스 추가 -->
+                <option value="1">하루</option>
+                <option value="3">3일</option>
+                <option value="5">5일</option>
+                <option value="7">7일</option>
+                <option value="15">15일</option>
+            </select>
+        </div>
+    </form> 
+</div>
+</body>
+</html>
