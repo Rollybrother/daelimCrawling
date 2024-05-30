@@ -1,4 +1,6 @@
-// script.js
+// 전역변수 선언
+let isAutoSearchEnabled = false;
+let intervalDays = 1;
 
 // 입력값을 지우는 함수
 function clearInput() {
@@ -8,40 +10,6 @@ function clearInput() {
 // 전체 선택 체크박스를 클릭했을 때의 동작
 function selectAllCheckboxes(source) {
     $('.rowCheckbox').prop('checked', source.checked);
-}
-
-// 선택항목 검색 함수
-function searchChecked() {
-    console.log("searchChecked called");
-    const checkedRows = $('input.rowCheckbox:checked');
-    const selectedItems = Array.from(checkedRows).map(row => {
-        const cells = $(row).closest('tr').find('td');
-        return {
-            index: cells.eq(1).text(),
-            name: cells.eq(2).text(),
-            price: cells.eq(3).text()
-        };
-    });
-
-    const searchType = $('input[name="searchType"]:checked').val();
-    const autoSearchEnabled = $('#autoSearchToggle').is(':checked');
-    const autoSearchInterval = $('#autoSearchInterval').val();
-
-    // 폼 생성 후 데이터 전송
-    const form = $('<form>', { method: 'POST', action: '/crawling/searchChecked' });
-
-    selectedItems.forEach(item => {
-        form.append($('<input>', { type: 'hidden', name: 'list.index[]', value: item.index }));
-        form.append($('<input>', { type: 'hidden', name: 'list.name[]', value: item.name }));
-        form.append($('<input>', { type: 'hidden', name: 'list.price[]', value: item.price }));
-    });
-
-    form.append($('<input>', { type: 'hidden', name: 'searchType', value: searchType }));
-    form.append($('<input>', { type: 'hidden', name: 'autoSearchEnabled', value: autoSearchEnabled }));
-    form.append($('<input>', { type: 'hidden', name: 'autoSearchInterval', value: autoSearchInterval }));
-
-    $('body').append(form);
-    form.submit();
 }
 
 // 데이터 추가 함수
@@ -113,15 +81,56 @@ function deleteRow() {
     }
 }
 
+// 선택항목 검색 함수
+function searchChecked() {
+    console.log("searchChecked called");
+    const checkedRows = $('input.rowCheckbox:checked');
+    const selectedItems = Array.from(checkedRows).map(row => {
+        const cells = $(row).closest('tr').find('td');
+        return {
+            index: cells.eq(1).text(),
+            name: cells.eq(2).text(),
+            price: cells.eq(3).text()
+        };
+    });
+
+    const searchType = $('input[name="searchType"]:checked').val();
+
+    // 전역변수 값 사용, 값이 없을 경우 기본값 사용
+    const autoSearchEnabled = typeof isAutoSearchEnabled !== 'undefined' ? isAutoSearchEnabled : false;
+    let autoSearchInterval = typeof intervalDays !== 'undefined' ? intervalDays : 1;
+
+    // autoSearchInterval이 NaN인지 확인하고 기본값 설정
+    if (isNaN(autoSearchInterval)) {
+        autoSearchInterval = 1;
+    }
+
+    // 폼 생성 후 데이터 전송
+    const form = $('<form>', { method: 'POST', action: '/crawling/searchChecked' });
+
+    selectedItems.forEach(item => {
+        form.append($('<input>', { type: 'hidden', name: 'list.index[]', value: item.index }));
+        form.append($('<input>', { type: 'hidden', name: 'list.name[]', value: item.name }));
+        form.append($('<input>', { type: 'hidden', name: 'list.price[]', value: item.price }));
+    });
+
+    form.append($('<input>', { type: 'hidden', name: 'searchType', value: searchType }));
+    form.append($('<input>', { type: 'hidden', name: 'autoSearchEnabled', value: autoSearchEnabled }));
+    form.append($('<input>', { type: 'hidden', name: 'autoSearchInterval', value: autoSearchInterval }));
+
+    $('body').append(form);
+    form.submit();
+}
+
 // 자동 검색 기능 설정
 let autoSearchTimeoutId;
 
 function calculateNextTimeout() {
     const now = new Date();
-    const nextRun = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 8, 41, 0, 0); // 다음 15:35
+    const nextRun = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 13, 21, 0, 0); // 다음 13:08
 
     if (now > nextRun) {
-        nextRun.setDate(nextRun.getDate() + 1); // 오늘 15:35이 이미 지났다면 다음 날로 설정
+        nextRun.setDate(nextRun.getDate() + 1); // 오늘 13:08이 이미 지났다면 다음 날로 설정
     }
 
     return nextRun - now; // 밀리초 단위 시간 차이 반환
@@ -129,8 +138,13 @@ function calculateNextTimeout() {
 
 function setAutoSearch() {
     console.log("자동검색 설정");
-    const isAutoSearchEnabled = $('#autoSearchToggle').is(':checked');
-    const intervalDays = parseInt($('#autoSearchInterval').val(), 10);
+    isAutoSearchEnabled = $('#autoSearchToggle').is(':checked');
+    intervalDays = parseInt($('#autoSearchInterval').val(), 10);
+
+    // intervalDays가 NaN인지 확인하고 기본값 설정
+    if (isNaN(intervalDays) || intervalDays <= 0) {
+        intervalDays = 1;
+    }
 
     if (isAutoSearchEnabled) {
         const timeout = calculateNextTimeout();
@@ -142,7 +156,7 @@ function setAutoSearch() {
         console.log(`자동 검색이 ${timeout / 1000}초 후에 실행됩니다.`);
     } else if (autoSearchTimeoutId) {
         clearTimeout(autoSearchTimeoutId);
-        autoSearchTimeoutId = null; // Timeout ID 초기화
+        autoSearchTimeoutId = null; 
     }
 }
 

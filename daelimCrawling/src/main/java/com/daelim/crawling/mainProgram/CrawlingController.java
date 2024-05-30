@@ -45,12 +45,13 @@ public class CrawlingController {
         return "splitView"; 
     }
     
-    
     @PostMapping("/searchChecked")
     public String searchChecked(@RequestParam("list.index[]") ArrayList<Integer> indices,
                                 @RequestParam("list.name[]") ArrayList<String> names,
                                 @RequestParam("list.price[]") ArrayList<Integer> prices,
                                 @RequestParam("searchType") String searchType,
+                                @RequestParam("autoSearchEnabled") boolean autoSearchEnabled,
+                                @RequestParam("autoSearchInterval") int autoSearchInterval,
                                 Model model) throws MessagingException, IOException {
 
         ArrayList<DaelimVO> list = new ArrayList<>();
@@ -58,7 +59,7 @@ public class CrawlingController {
             DaelimVO item = new DaelimVO(indices.get(i), names.get(i), prices.get(i));
             list.add(item);
         }
-        ArrayList<CrawlingDto> searchBeforeResult = crawlingService.searchMany(list, searchType); 
+        ArrayList<CrawlingDto> searchBeforeResult = crawlingService.searchMany(list, searchType);
         ArrayList<CrawlingDto> searchFinalResult = new ArrayList<>();
 
         for (DaelimVO e : list) {
@@ -78,11 +79,16 @@ public class CrawlingController {
         // 이메일 발송
         sendEmail(searchFinalResult, percentArray);
 
-        model.addAttribute("list", originalList); 
-        model.addAttribute("listAfter", searchFinalResult); 
-        model.addAttribute("percentArray", percentArray); 
-        return "splitView"; 
+        model.addAttribute("list", originalList);
+        model.addAttribute("listAfter", searchFinalResult);
+        model.addAttribute("percentArray", percentArray);
+        model.addAttribute("autoSearchEnabled", autoSearchEnabled);
+        model.addAttribute("autoSearchInterval", autoSearchInterval);
+        model.addAttribute("indices", indices); 
+        model.addAttribute("searchType", searchType); 
+        return "splitView";
     }
+
 
     @GetMapping("/afterSearch")
     public String afterList(@RequestParam("productCode") String productCode, 
