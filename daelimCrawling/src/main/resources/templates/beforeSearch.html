@@ -12,11 +12,14 @@
             border-collapse: collapse;
             width: 100%;
             border: 1px solid #dee2e6;
+            table-layout: normal;
         }
         th, td {
             border: 1px solid #dee2e6;
             padding: 8px;
             text-align: left;
+            word-wrap: break-word;
+            white-space: normal; /* Allow text to wrap */
         }
         th {
             background-color: #f8f9fa;
@@ -25,16 +28,28 @@
             max-height: 500px;
             overflow-y: auto;
         }
+        .product-name {
+            width: 50%;
+        }
+        .date-column {
+            width: 20%;
+        }
+        .price-column {
+            width: 20%;
+        }
+        .link-column {
+            width: 10%;
+        }
     </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
 <div th:fragment="content" class="container mt-4">
     <div class="logo mb-4">
-        <a href="http://localhost:8070/crawling/beforeSearch">
+        <!--<a href="http://localhost:8070/crawling/beforeSearch">
             <img src="/img/logo.JPG" alt="대림통상 로고">
-        </a>
-        <h2>제품가격 감시시스템</h2>
+        </a>-->
+        <h2>제품가격 모니터링 시스템</h2>
     </div>
     
     <form id="mainForm" action="/crawling/afterSearch" method="get" class="mb-4">
@@ -74,7 +89,7 @@
                     <tr th:each="item : ${list}">
                         <td><input type="checkbox" class="rowCheckbox"></td>
                         <td class="clickable" th:data-slipno="${item.index}" th:data-acdate="${item.index}" th:text="${item.index}">구분 인덱스</td>
-                        <td class="clickable" th:data-slipno="${item.name}" th:data-acdate="${item.name}" th:text="${item.name}">검색대상 제품</td>
+                        <td class="clickable product-name" th:data-slipno="${item.name}" th:data-acdate="${item.name}" th:text="${item.name}">검색대상 제품</td>
                         <td class="clickable" th:data-slipno="${item.price}" th:data-acdate="${item.price}" th:text="${item.price}">최저가격 설정</td>
                     </tr>
                 </tbody>
@@ -101,9 +116,37 @@
                 <option value="15">15일</option>
             </select>
         </div>
-    </form> 
+
+        <!-- 과거 검색기록 섹션 시작 -->
+        <div class="mt-4">
+            <h3>과거기록 조회</h3>
+            <div class="mb-3">
+                <label for="searchDate" class="form-label">날짜 선택:</label>
+                <input type="date" id="searchDate" name="searchDate" class="form-control w-auto d-inline">
+				<!-- 검색 버튼에 onclick 이벤트 추가 -->
+				<button type="button" class="btn btn-primary ms-3" onclick="searchPast()">해당날짜 검색</button>
+                <label for="pastSearchKeyword" class="form-label ms-3">조회결과 검색필터</label>
+                <input type="text" id="pastSearchKeyword" name="pastSearchKeyword" class="form-control w-auto d-inline">
+				<button type="button" class="btn btn-primary ms-3" onclick="filterData()">검색필터 적용</button>
+            </div>
+            <div class="table-wrapper">
+                <table class="table table-bordered" id="pastDataTable">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="date-column">날짜</th>
+                            <th scope="col" class="product-name">제품이름</th>
+                            <th scope="col" class="price-column">가격</th>
+                            <th scope="col" class="link-column">링크</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- 여기에 검색 결과가 표시됩니다 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- 과거 검색기록 섹션 끝 -->
+    </form>
 </div>
-
-
 </body>
 </html>

@@ -1,8 +1,9 @@
 package com.daelim.crawling.mainProgram;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.By;
@@ -11,17 +12,19 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.daelim.crawling.Daelim.DaelimVO;
+import com.daelim.crawling.mainProgram.crawlingHistory.CrawlingHistoryService;
 
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Service
 public class CrawlingService {
+	
+	private final CrawlingHistoryService crawlingHistoryService;
 	
 	public ArrayList<CrawlingDto> searchMany(ArrayList<DaelimVO> list, String searchType) {
         ArrayList<CrawlingDto> temp = new ArrayList<>();
@@ -45,11 +48,15 @@ public class CrawlingService {
                     if (e.getPrice() < e2.getPrice()) {
                         e.setOK(false);
                     }
+                    LocalDate today = LocalDate.now();
+    		        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+    		        String formattedDate = today.format(formatter);
+    				e.setDate(formattedDate);
                     result.add(e);
                 }
             }
         }
-
+        crawlingHistoryService.insert(result);
         return result;
     }
 	
@@ -69,11 +76,14 @@ public class CrawlingService {
 		ArrayList<CrawlingDto> result = new ArrayList<>();
 		for(CrawlingDto e : temp) {
 			if(isValid(e,productCode)) {
+				LocalDate today = LocalDate.now();
+		        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+		        String formattedDate = today.format(formatter);
+				e.setDate(formattedDate);
 				result.add(e);
 			}
 		}
-		
-		
+		crawlingHistoryService.insert(result);
 		return result;
 	}
 	

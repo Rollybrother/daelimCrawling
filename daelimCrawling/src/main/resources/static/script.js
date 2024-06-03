@@ -238,6 +238,59 @@ function applySearchFilter() {
     });
 }
 
+function searchPast() {
+    var searchDate = document.getElementById("searchDate").value;
+
+    if (!searchDate) {
+        alert("날짜를 선택해주세요.");
+        return;
+    }
+
+    var formattedDate = searchDate.replace(/-/g, '');
+
+    $.ajax({
+        url: '/ajax/searchByDate',
+        type: 'GET',
+        data: {
+            date: formattedDate
+        },
+        success: function(response) {
+            var tableBody = $("#pastDataTable tbody");
+            tableBody.empty();
+
+            response.forEach(function(item) {
+                var row = `<tr>
+                    <td>${item.date}</td>
+                    <td>${item.name}</td>
+                    <td>${item.price}</td>
+                    <td><a href="${item.link}" target="_blank">링크</a></td>
+                </tr>`;
+                tableBody.append(row);
+            });
+        },
+        error: function() {
+            alert("데이터를 가져오는데 실패했습니다.");
+        }
+    });
+}
+
+function filterData() {
+    var keyword = document.getElementById("pastSearchKeyword").value.toLowerCase();
+    var tableBody = $("#pastDataTable tbody");
+    var rows = tableBody.find("tr");
+
+    rows.each(function() {
+        var row = $(this);
+        var productName = row.find("td:nth-child(2)").text().toLowerCase();
+
+        if (productName.includes(keyword)) {
+            row.show();
+        } else {
+            row.hide();
+        }
+    });
+}
+
 // 로딩이 완료된 후 메시지 출력 및 자동 검색 설정
 $(document).ready(function() {
     console.log("Document is ready");

@@ -18,6 +18,39 @@
         .left {
             border-right: 1px solid #ddd;
         }
+        /* 추가된 스타일 */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            border: 1px solid #dee2e6;
+            table-layout: normal;
+        }
+        th, td {
+            border: 1px solid #dee2e6;
+            padding: 8px;
+            text-align: left;
+            word-wrap: break-word;
+            white-space: normal; /* Allow text to wrap */
+        }
+        th {
+            background-color: #f8f9fa;
+        }
+        .table-wrapper {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .product-name {
+            width: 50%;
+        }
+        .date-column {
+            width: 20%;
+        }
+        .price-column {
+            width: 20%;
+        }
+        .link-column {
+            width: 10%;
+        }
     </style>
     <script th:inline="javascript">
         /*<![CDATA[*/

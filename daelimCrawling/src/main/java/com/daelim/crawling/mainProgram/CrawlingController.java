@@ -30,7 +30,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Controller
 public class CrawlingController {
-    CrawlingService crawlingService = new CrawlingService();
+	private final CrawlingService crawlingService;
     private final DaelimRepository daelimRepository;
 
     @GetMapping("/beforeSearch")

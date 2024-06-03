@@ -12,6 +12,7 @@ public class CrawlingDto {
 	private String link;
 	private boolean isOK = true;
 	private String searchFrom;
+	private String date;
 	
 	CrawlingDto(){
 		
