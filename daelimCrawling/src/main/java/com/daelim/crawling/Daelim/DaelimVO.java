@@ -27,4 +27,26 @@ public class DaelimVO {
 	@Column(name = "price")
 	private int price;
 	
+	@Column(name = "searchLimit")
+	private int searchLimit;
+
+	@Column(name = "competitor1Product")
+	private String competitor1Product="";
+	
+	@Column(name = "competitor1Name")
+	private String competitor1Name="";
+	
+	@Column(name = "competitor2Product")
+	private String competitor2Product="";
+	
+	@Column(name = "competitor2Name")
+	private String competitor2Name="";
+	
+	public DaelimVO(int index, String name, int price, int searchLimit) {
+		super();
+		this.index = index;
+		this.name = name;
+		this.price = price;
+		this.searchLimit = searchLimit;
+	}
 }

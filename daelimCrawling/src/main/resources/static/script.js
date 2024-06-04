@@ -27,13 +27,20 @@ function addRow() {
     confirmAdd.onclick = function() {
         const productName = document.getElementById("productName").value;
         const productPrice = document.getElementById("productPrice").value;
+		const searchLimit = document.getElementById("searchLimit").value;
+		const competitor1Product = document.getElementById("competitor1Product").value;
+		const competitor1Name = document.getElementById("competitor1Name").value;
+		const competitor2Product = document.getElementById("competitor2Product").value;
+		const competitor2Name = document.getElementById("competitor2Name").value;
 
         if (productName && productPrice) {
             $.ajax({
                 type: "POST",
                 url: "/ajax/addProduct",
                 contentType: "application/json",
-                data: JSON.stringify({ name: productName, price: productPrice }),
+                data: JSON.stringify({ name: productName, price: productPrice, searchLimit: searchLimit,
+                competitor1Product : competitor1Product, competitor2Product : competitor2Product, 
+                competitor1Name:competitor1Name,competitor2Name:competitor2Name}),
                 success: function(response) {
                     $('#dataTable tbody').append(`
                         <tr>
@@ -41,6 +48,11 @@ function addRow() {
                             <td class="clickable">${response.index}</td>
                             <td class="clickable">${response.name}</td>
                             <td class="clickable">${response.price}</td>
+                            <td class="clickable">${response.searchLimit}</td>
+                            <td class="clickable">${response.competitor1Product}</td>
+                            <td class="clickable">${response.competitor1Name}</td>
+                            <td class="clickable">${response.competitor2Product}</td>
+                            <td class="clickable">${response.competitor2Name}</td>
                         </tr>
                     `);
                     modal.hide(); // Close the modal after successful addition
@@ -90,7 +102,12 @@ function searchChecked() {
         return {
             index: cells.eq(1).text(),
             name: cells.eq(2).text(),
-            price: cells.eq(3).text()
+            price: cells.eq(3).text(),
+            searchLimit : cells.eq(4).text(),
+            competitor1Product : cells.eq(5).text(),
+            competitor1Name : cells.eq(6).text(),
+            competitor2Product : cells.eq(7).text(),
+            competitor2Name : cells.eq(8).text()
         };
     });
 
@@ -112,6 +129,11 @@ function searchChecked() {
         form.append($('<input>', { type: 'hidden', name: 'list.index[]', value: item.index }));
         form.append($('<input>', { type: 'hidden', name: 'list.name[]', value: item.name }));
         form.append($('<input>', { type: 'hidden', name: 'list.price[]', value: item.price }));
+        form.append($('<input>', { type: 'hidden', name: 'list.searchLimit[]', value: item.searchLimit }));
+        form.append($('<input>', { type: 'hidden', name: 'list.competitor1Product[]', value: item.competitor1Product }));
+        form.append($('<input>', { type: 'hidden', name: 'list.competitor1Name[]', value: item.competitor1Name }));
+        form.append($('<input>', { type: 'hidden', name: 'list.competitor2Product[]', value: item.competitor2Product }));
+        form.append($('<input>', { type: 'hidden', name: 'list.competitor2Name[]', value: item.competitor2Name }));
     });
 
     form.append($('<input>', { type: 'hidden', name: 'searchType', value: searchType }));
@@ -344,4 +366,34 @@ $(document).ready(function() {
     } else {
         console.log("No data available for chart.");
     }
+
+    if (competitorResult && competitorResult.length > 0) {
+        var labels = competitorResult.map(item => item.productName + ', ' + item.shoppingMall);
+        var data = competitorResult.map(item => item.averagePrice);
+
+        var ctx = document.getElementById('competitorChart').getContext('2d');
+        var competitorChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '경쟁사 제품 사이트별 평균 가격',
+                    data: data,
+                    backgroundColor: 'rgba(70, 130, 180, 0.7)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    } else {
+        console.log("No data available for competitor chart.");
+    }
 });
+

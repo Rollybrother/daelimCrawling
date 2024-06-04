@@ -29,16 +29,16 @@
             overflow-y: auto;
         }
         .product-name {
-            width: 50%;
+            width: 30%;
         }
         .date-column {
-            width: 20%;
+            width: 15%;
         }
         .price-column {
-            width: 20%;
+            width: 15%;
         }
-        .link-column {
-            width: 10%;
+        .competitor-column {
+            width: 15%;
         }
     </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -80,17 +80,25 @@
                 <thead>
                     <tr>
                         <th scope="col"><input type="checkbox" id="selectAll" onclick="selectAllCheckboxes(this)"></th>
-                        <th scope="col">구분 인덱스</th>
+                        <th scope="col">구분</th>
                         <th scope="col">검색대상 제품</th>
-                        <th scope="col">최저가격 설정</th>
+                        <th scope="col">허용 최저가격</th>
+						<th scope="col">가격 검색범위 &plusmn</th>
+                        <th scope="col" colspan="2">경쟁사 제품 1</th>
+                        <th scope="col" colspan="2">경쟁사 제품 2</th>
                     </tr>
-                </thead>  
+                </thead>
                 <tbody>
                     <tr th:each="item : ${list}">
                         <td><input type="checkbox" class="rowCheckbox"></td>
-                        <td class="clickable" th:data-slipno="${item.index}" th:data-acdate="${item.index}" th:text="${item.index}">구분 인덱스</td>
+                        <td class="clickable" th:data-slipno="${item.index}" th:data-acdate="${item.index}" th:text="${item.index}">구분</td>
                         <td class="clickable product-name" th:data-slipno="${item.name}" th:data-acdate="${item.name}" th:text="${item.name}">검색대상 제품</td>
                         <td class="clickable" th:data-slipno="${item.price}" th:data-acdate="${item.price}" th:text="${item.price}">최저가격 설정</td>
+						<td class="clickable" th:data-slipno="${item.searchLimit}" th:data-acdate="${item.searchLimit}" th:text="${item.searchLimit}">가격 검색범위 &plusmn</td>
+						<td class="clickable competitor-column" th:data-slipno="${item.competitor1Product}" th:data-acdate="${item.competitor1Product}" th:text="${item.competitor1Product}">경쟁사 제품 1</td>
+                        <td class="clickable competitor-column" th:data-slipno="${item.competitor1Name}" th:data-acdate="${item.competitor1Name}" th:text="${item.competitor1Name}">경쟁사1 이름</td>
+                        <td class="clickable competitor-column" th:data-slipno="${item.competitor2Product}" th:data-acdate="${item.competitor2Product}" th:text="${item.competitor2Product}">경쟁사 제품 2</td>
+                        <td class="clickable competitor-column" th:data-slipno="${item.competitor2Name}" th:data-acdate="${item.competitor2Name}" th:text="${item.competitor2Name}">경쟁사2 이름</td>
                     </tr>
                 </tbody>
             </table>

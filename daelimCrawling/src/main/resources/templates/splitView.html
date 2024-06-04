@@ -40,16 +40,16 @@
             overflow-y: auto;
         }
         .product-name {
-            width: 50%;
+            width: 30%;
         }
         .date-column {
-            width: 20%;
+            width: 15%;
         }
         .price-column {
-            width: 20%;
+            width: 15%;
         }
-        .link-column {
-            width: 10%;
+        .competitor-column {
+            width: 15%;
         }
     </style>
     <script th:inline="javascript">
@@ -59,12 +59,8 @@
         var autoSearchEnabled = /*[[${autoSearchEnabled}]]*/ false;
         var autoSearchInterval = /*[[${autoSearchInterval}]]*/ 1;
         var searchType = /*[[${searchType}]]*/ 'all';
+        var competitorResult = /*[[${competitorResult}]]*/ [];
         /*]]>*/
-        console.log('percentArray:', percentArray);
-        console.log('indices:', indices);
-        console.log('autoSearchEnabled:', autoSearchEnabled);
-        console.log('autoSearchInterval:', autoSearchInterval);
-        console.log('searchType:', searchType);
     </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -88,8 +84,22 @@
                         <input type="text" class="form-control" id="productName" name="productName">
                     </div>
                     <div class="mb-3">
-                        <label for="productPrice" class="form-label">제품 가격:</label>
+                        <label for="productPrice" class="form-label">제품 허용 최저가격:</label>
                         <input type="text" class="form-control" id="productPrice" name="productPrice">
+						<label for="searchLimit" class="form-label">가격 검색범위 &plusmn :</label>
+                        <input type="text" class="form-control" id="searchLimit" name="searchLimit">
+                    </div>
+                    <div class="mb-3">
+                        <label for="competitor1Product" class="form-label">경쟁사 제품 1 이름:</label>
+                        <input type="text" class="form-control" id="competitor1Product" name="competitor1Product" placeholder="선택사항">
+                        <label for="competitor1Name" class="form-label">경쟁업체명</label>
+                        <input type="text" class="form-control" id="competitor1Name" name="competitor1Name" placeholder="선택사항">
+                    </div>
+                    <div class="mb-3">
+                        <label for="competitor2Product" class="form-label">경쟁사 제품 2 이름:</label>
+                        <input type="text" class="form-control" id="competitor2Product" name="competitor2Product" placeholder="선택사항">
+                        <label for="competitor2Name" class="form-label">경쟁업체명</label>
+                        <input type="text" class="form-control" id="competitor2Name" name="competitor2Name" placeholder="선택사항">
                     </div>
                 </form>
             </div>
@@ -113,12 +123,6 @@
         var autoSearchInterval = /*[[${autoSearchInterval}]]*/ 1;
         var searchType = /*[[${searchType}]]*/ 'all';
         var selectedIndices = /*[[${indices}]]*/ [];
-
-        console.log('여기서부터 beforeSearch.html까지 데이터가 도달한 것임');
-        console.log('autoSearchEnabled:', autoSearchEnabled);
-        console.log('autoSearchInterval:', autoSearchInterval);
-        console.log('searchType:', searchType);
-        console.log('selectedIndices:', selectedIndices);
 
         // 자동 감시 토글 및 주기 설정
         if (autoSearchEnabled) {

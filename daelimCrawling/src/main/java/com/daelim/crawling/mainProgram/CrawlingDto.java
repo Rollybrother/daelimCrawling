@@ -17,7 +17,7 @@ public class CrawlingDto {
 	CrawlingDto(){
 		
 	}
-	CrawlingDto(String name,int price,String link,String searchFrom){
+	public CrawlingDto(String name,int price,String link,String searchFrom){
 		this.name = name;
 		this.price = price;
 		this.link = link;

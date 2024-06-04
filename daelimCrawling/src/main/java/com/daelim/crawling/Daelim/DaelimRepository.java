@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.beust.jcommander.Parameter;
+
 import jakarta.transaction.Transactional;
 
 @Repository
@@ -18,8 +20,11 @@ public interface DaelimRepository extends JpaRepository<DaelimVO,Integer>{
 	ArrayList<DaelimVO> findAllFromDbCrawling();
 	
 	@Modifying
-    @Query(value = "INSERT INTO db_crawling (name, price) VALUES (:name, :price)", nativeQuery = true)
-    Integer insertForDbCrawling(@Param("name")String name, @Param("price")int price);
+    @Query(value = "INSERT INTO db_crawling (name, price,searchLimit,competitor1Product,competitor1Name,competitor2Product,competitor2Name) "
+    		+ "VALUES (:name, :price,:searchLimit,:competitor1Product,:competitor1Name,:competitor2Product,:competitor2Name)", nativeQuery = true)
+    Integer insertForDbCrawling(@Param("name")String name, @Param("price")int price,@Param("searchLimit")int searchLimit,
+    		@Param("competitor1Product")String competitor1Product,@Param("competitor1Name")String competitor1Name,
+    		@Param("competitor2Product")String competitor2Product,@Param("competitor2Name")String competitor2Name);
 	
 	@Query(value = "SELECT `index` FROM db_crawling WHERE name = :name LIMIT 1", nativeQuery = true)
 	Integer findIndexByName(@Param("name") String name);

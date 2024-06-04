@@ -1,8 +1,8 @@
-package com.daelim.crawling.mainProgram;
+package com.daelim.crawling.mainProgram.competitor;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -12,103 +12,110 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.springframework.stereotype.Service;
 
 import com.daelim.crawling.Daelim.DaelimVO;
-import com.daelim.crawling.mainProgram.competitor.CompetitorService;
-import com.daelim.crawling.mainProgram.crawlingHistory.CrawlingHistoryService;
+import com.daelim.crawling.mainProgram.CrawlingDto;
 
-import lombok.RequiredArgsConstructor;
+public class CompetitorService {
+	private ArrayList<DaelimVO> list;
+	private String searchType;
 
-@RequiredArgsConstructor
-@Service
-public class CrawlingService {
-	
-	private final CrawlingHistoryService crawlingHistoryService;
-	public ArrayList<CrawlingDto> searchMany(ArrayList<DaelimVO> list, String searchType) {
-        ArrayList<CrawlingDto> temp = new ArrayList<>();
-        for (DaelimVO e : list) {
-            String productCode = e.getName();
-            if (searchType.equals("all")) {
-                temp.addAll(searchNaver(productCode));
-                temp.addAll(searchCoupang(productCode));
-                // 여기 쇼핑몰 목록 추가
-            } else if (searchType.equals("naver")) {
-                temp.addAll(searchNaver(productCode));
-            } else if (searchType.equals("coupang")) {
-                temp.addAll(searchCoupang(productCode));
-            }
-        }
-        
-        ArrayList<CrawlingDto> result = new ArrayList<>();
-        for (CrawlingDto e : temp) {
-            for (DaelimVO e2 : list) {
-                if (isValid(e, e2.getName())) {
-                    if (e.getPrice() < e2.getPrice()) {
-                        e.setOK(false);
-                    }
-                    int lowerBound = e2.getPrice()-e2.getSearchLimit();
-                    int upperBound = e2.getPrice()+e2.getSearchLimit();
-                    if(e.getPrice()<lowerBound || e.getPrice()>upperBound) {
-                    	break;
-                    }
-                    LocalDate today = LocalDate.now();
-    		        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
-    		        String formattedDate = today.format(formatter);
-    				e.setDate(formattedDate);
-                    result.add(e);
-                }
-            }
-        }
-        crawlingHistoryService.insert(result);
-        return result;
-    }
-	
-	
-	
-	public ArrayList<CrawlingDto> search(String productCode,String searchType) {
+	public CompetitorService(ArrayList<DaelimVO> list, String searchType) {
+		this.list = list;
+		this.searchType = searchType;
+	}
+
+	public ArrayList<CompetitorDto> finalComputation() {
+	    ArrayList<CompetitorDto> parameter = competitorSearch(this.list, this.searchType);
+	    ArrayList<CompetitorDto> result = new ArrayList<>();
+
+	    HashSet<List<String>> set = new HashSet<>();
+	    
+	    for(CompetitorDto e : parameter) {
+	        List<String> temp = Arrays.asList(e.getProductName(), e.getShoppingMall());
+	        if(!set.contains(temp)) {
+	            set.add(temp);
+	        }
+	    }
+	    
+	    for(List<String> productInfo : set) {
+	        int average = 0;
+	        int tempSum = 0;
+	        int size = 0;
+	        for(CompetitorDto e : parameter) {
+	            if(e.getProductName().equals(productInfo.get(0)) && e.getShoppingMall().equals(productInfo.get(1))) {
+	                size++;
+	                tempSum += e.getPrice();
+	            }
+	        }
+	        average = tempSum / size;
+	        result.add(new CompetitorDto(productInfo.get(0), productInfo.get(1), average));
+	    }
+	    
+	    
+	    return result;
+	}
+
+	public ArrayList<CompetitorDto> competitorSearch(ArrayList<DaelimVO> list, String searchType){
 		ArrayList<CrawlingDto> temp = new ArrayList<>();
-		if(searchType.equals("all")) {
-			temp.addAll(searchNaver(productCode));
-			temp.addAll(searchCoupang(productCode));
-			//여기 쇼핑몰 목록 추가
-		}else if(searchType.equals("naver")) {
-			temp.addAll(searchNaver(productCode));
-		}else if(searchType.equals("coupang")) {
-			temp.addAll(searchCoupang(productCode));
-		}
-		ArrayList<CrawlingDto> result = new ArrayList<>();
-		for(CrawlingDto e : temp) {
-			if(isValid(e,productCode)) {
-				LocalDate today = LocalDate.now();
-		        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
-		        String formattedDate = today.format(formatter);
-				e.setDate(formattedDate);
-				result.add(e);
-			}
-		}
-		crawlingHistoryService.insert(result);
+		ArrayList<CompetitorDto> result = new ArrayList<>();
+		ArrayList<String> competitorsProduct;
+		ArrayList<String> competitorsName;
+        for (DaelimVO e : list) {
+        	competitorsProduct = new ArrayList<>();
+        	competitorsName = new ArrayList<>();
+        	if(e.getCompetitor1Name()!="") {
+        		competitorsProduct.add(e.getCompetitor1Product());
+        	}
+        	if(e.getCompetitor2Name()!="") {
+        		competitorsProduct.add(e.getCompetitor2Product());
+        	}
+        	if(e.getCompetitor1Name()!="") {
+        		competitorsName.add(e.getCompetitor1Name());
+        	}
+        	if(e.getCompetitor2Name()!="") {
+        		competitorsName.add(e.getCompetitor2Name());
+        	}
+        	
+        	for(int i=0;i<competitorsProduct.size();i++) {
+        		
+        		String competitorCode = competitorsProduct.get(i);
+                if (searchType.equals("all")) {
+                    temp.addAll(searchNaver(competitorCode));
+                    temp.addAll(searchCoupang(competitorCode));
+                    // 여기 쇼핑몰 목록 추가
+                } else if (searchType.equals("naver")) {
+                    temp.addAll(searchNaver(competitorCode));
+                } else if (searchType.equals("coupang")) {
+                    temp.addAll(searchCoupang(competitorCode));
+                }
+                for(CrawlingDto e2 : temp) {
+                	if(isValid(e2,competitorsProduct.get(i),competitorsName.get(i))) {
+                		CompetitorDto push = new CompetitorDto(competitorsProduct.get(i),competitorsName.get(i),e2.getSearchFrom(),e2.getPrice());
+                		result.add(push);
+                	}
+                }
+        	}
+        }
 		return result;
 	}
 	
-	public boolean isValid(CrawlingDto e,String searchTarget) {
+	public boolean isValid(CrawlingDto e,String competitorProduct,String competitorName) {
 	    if (e == null) {
 	        return false;
 	    }
-	    if(!e.getName().contains(searchTarget)) {
+	    if(!e.getName().contains(competitorProduct) || !e.getName().contains(competitorName)) {
 	    	return false;
 	    }
 	    String name = e.getName();
-	    if (name.contains("대림") || name.contains("도비도스") || name.contains("대림통상")) {
-	        if (name.contains("대림바스")) {
+	    if (name.contains(competitorName)) {
+	        if (name.contains("부품")) {
 	            return false;
 	        }
 	        return true;
 	    }
 	    return false;
 	}
-
-	
 	public ArrayList<CrawlingDto> searchCoupang(String target) {
 	    // 1. 웹 드라이버 설정
 	    System.setProperty("webdriver.chrome.driver", "driver/chromedriver.exe");

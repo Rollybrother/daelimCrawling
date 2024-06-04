@@ -23,13 +23,15 @@ public class AjaxController {
     public DaelimVO addProduct(@RequestBody DaelimVO product) {
         // 이 자리에 insert 함수를 만들고 싶어
     	try {
-    		daelimRepository.insertForDbCrawling(product.getName(), product.getPrice());
+    		daelimRepository.insertForDbCrawling(product.getName(), product.getPrice(), product.getSearchLimit(),
+    				product.getCompetitor1Product(),product.getCompetitor1Name(),product.getCompetitor2Product(),product.getCompetitor2Name());
 		} catch (Exception e) {
 			System.out.println(e);
 		}
     	
     	DaelimVO result 
-    	= new DaelimVO(daelimRepository.findIndexByName(product.getName()),product.getName(), product.getPrice());
+    	= new DaelimVO(daelimRepository.findIndexByName(product.getName()),product.getName(), product.getPrice(), product.getSearchLimit(),
+    			product.getCompetitor1Product(),product.getCompetitor1Name(),product.getCompetitor2Product(),product.getCompetitor2Name());
         return result;
     }
     

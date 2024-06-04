@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.daelim.crawling.Daelim.DaelimRepository;
 import com.daelim.crawling.Daelim.DaelimVO;
+import com.daelim.crawling.mainProgram.competitor.CompetitorDto;
+import com.daelim.crawling.mainProgram.competitor.CompetitorService;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -32,6 +34,7 @@ import lombok.RequiredArgsConstructor;
 public class CrawlingController {
 	private final CrawlingService crawlingService;
     private final DaelimRepository daelimRepository;
+	private CompetitorService competitorService;
 
     @GetMapping("/beforeSearch")
     public String beforeList(Model model) {
@@ -49,19 +52,36 @@ public class CrawlingController {
     public String searchChecked(@RequestParam("list.index[]") ArrayList<Integer> indices,
                                 @RequestParam("list.name[]") ArrayList<String> names,
                                 @RequestParam("list.price[]") ArrayList<Integer> prices,
+                                @RequestParam("list.searchLimit[]") ArrayList<Integer> searchLimits,
+                                @RequestParam("list.competitor1Product[]") ArrayList<String> competitor1Products,
+                                @RequestParam("list.competitor1Name[]") ArrayList<String> competitor1Names,
+                                @RequestParam("list.competitor2Product[]") ArrayList<String> competitor2Products,
+                                @RequestParam("list.competitor2Name[]") ArrayList<String> competitor2Names,
                                 @RequestParam("searchType") String searchType,
                                 @RequestParam("autoSearchEnabled") boolean autoSearchEnabled,
                                 @RequestParam("autoSearchInterval") int autoSearchInterval,
                                 Model model) throws MessagingException, IOException {
-
+    							
         ArrayList<DaelimVO> list = new ArrayList<>();
         for (int i = 0; i < indices.size(); i++) {
-            DaelimVO item = new DaelimVO(indices.get(i), names.get(i), prices.get(i));
+            DaelimVO item = new DaelimVO(indices.get(i), names.get(i), prices.get(i), searchLimits.get(i));
+            if(i<competitor1Products.size()) {
+            	item.setCompetitor1Product(competitor1Products.get(i));
+            	item.setCompetitor1Name(competitor1Names.get(i));
+            }
+            if(i<competitor2Products.size()) {
+            	item.setCompetitor2Product(competitor2Products.get(i));
+            	item.setCompetitor2Name(competitor2Names.get(i));
+            }
             list.add(item);
         }
         ArrayList<CrawlingDto> searchBeforeResult = crawlingService.searchMany(list, searchType);
+        // 경쟁자 데이터 계산
+        competitorService = new CompetitorService(list, searchType);
+        ArrayList<CompetitorDto> competitorResult = competitorService.finalComputation();
+        	
         ArrayList<CrawlingDto> searchFinalResult = new ArrayList<>();
-
+        
         for (DaelimVO e : list) {
             int limitPrice = e.getPrice();
             for (CrawlingDto e2 : searchBeforeResult) {
@@ -75,7 +95,7 @@ public class CrawlingController {
         }
         ArrayList<DaelimVO> originalList = this.daelimRepository.findAllFromDbCrawling();
         ArrayList<percentDto> percentArray = analizePercent(searchFinalResult);
-
+        
         // 이메일 발송
         sendEmail(searchFinalResult, percentArray);
 
@@ -84,8 +104,9 @@ public class CrawlingController {
         model.addAttribute("percentArray", percentArray);
         model.addAttribute("autoSearchEnabled", autoSearchEnabled);
         model.addAttribute("autoSearchInterval", autoSearchInterval);
-        model.addAttribute("indices", indices); 
+        model.addAttribute("indices", indices);
         model.addAttribute("searchType", searchType); 
+        model.addAttribute("competitorResult", competitorResult); 
         return "splitView";
     }
 
