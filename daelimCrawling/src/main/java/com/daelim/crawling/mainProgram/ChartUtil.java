@@ -1,16 +1,22 @@
 package com.daelim.crawling.mainProgram;
 
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartUtils;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.title.LegendTitle;
-import org.jfree.chart.ui.RectangleEdge;
-import org.jfree.data.category.DefaultCategoryDataset;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartUtils;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.renderer.category.BarRenderer;
+import org.jfree.chart.title.LegendTitle;
+import org.jfree.chart.ui.RectangleEdge;
+import org.jfree.data.category.DefaultCategoryDataset;
+
+import com.daelim.crawling.mainProgram.competitor.CompetitorDto;
 
 public class ChartUtil {
 
@@ -41,6 +47,34 @@ public class ChartUtil {
         BufferedImage chartImage = barChart.createBufferedImage(800, 600);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ChartUtils.writeBufferedImageAsPNG(baos, chartImage);
+        return baos.toByteArray();
+    }
+    
+    public static byte[] createCompetitorChartImage(ArrayList<CompetitorDto> competitorArray) throws IOException {
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+
+        for (CompetitorDto dto : competitorArray) {
+            String rowKey = dto.getProductName() + ", " + dto.getShoppingMall();
+            dataset.addValue(dto.getAveragePrice(), "Average Price", rowKey);
+        }
+
+        JFreeChart barChart = ChartFactory.createBarChart(
+                "Competitor Prices",
+                "Product, Shopping Mall",
+                "Average Price",
+                dataset,
+                PlotOrientation.VERTICAL,
+                true, true, false);
+
+        // 커스터마이즈 차트 색상 등
+        CategoryPlot plot = barChart.getCategoryPlot();
+        BarRenderer renderer = (BarRenderer) plot.getRenderer();
+        renderer.setSeriesPaint(0, new Color(70, 130, 180)); // 짙은 하늘색
+
+        BufferedImage chartImage = barChart.createBufferedImage(800, 600);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ChartUtils.writeBufferedImageAsPNG(baos, chartImage);
+
         return baos.toByteArray();
     }
 }

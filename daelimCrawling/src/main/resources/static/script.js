@@ -198,7 +198,7 @@ $('#autoSearchToggle').change(function() {
         setAutoSearch();
     } else if (autoSearchTimeoutId) {
         clearTimeout(autoSearchTimeoutId);
-        autoSearchTimeoutId = null; // Timeout ID 초기화
+        autoSearchTimeoutId = null; 
     }
 });
 
@@ -316,6 +316,20 @@ function filterData() {
 // 로딩이 완료된 후 메시지 출력 및 자동 검색 설정
 $(document).ready(function() {
     console.log("Document is ready");
+	 $('#mainForm').on('submit', function(event) {
+        if (!$('input[name="searchType"]:checked').val()) {
+            alert("탐색방법을 선택해주세요");
+            event.preventDefault(); // 폼 제출을 막음
+            return false;
+        }
+
+        if (!$('#productCode').val().trim()) {
+            alert("검색어가 없습니다");
+            event.preventDefault(); // 폼 제출을 막음
+            return false;
+        }
+    });
+
 
     // 초기 자동 검색 설정
     if ($('#autoSearchToggle').is(':checked')) {

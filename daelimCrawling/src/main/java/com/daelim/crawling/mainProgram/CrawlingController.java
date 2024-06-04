@@ -97,7 +97,7 @@ public class CrawlingController {
         ArrayList<percentDto> percentArray = analizePercent(searchFinalResult);
         
         // 이메일 발송
-        sendEmail(searchFinalResult, percentArray);
+        sendEmail(searchFinalResult, percentArray,competitorResult);
 
         model.addAttribute("list", originalList);
         model.addAttribute("listAfter", searchFinalResult);
@@ -121,51 +121,58 @@ public class CrawlingController {
         return "splitView"; 
     }
 
-    private void sendEmail(ArrayList<CrawlingDto> target, ArrayList<percentDto> percentArray) throws MessagingException, IOException {
-        ArrayList<CrawlingDto> sendMail = new ArrayList<>();
-        for (CrawlingDto e : target) {
-            if (!e.isOK()) {
-                sendMail.add(e);
-            }
-        }
+    private void sendEmail(ArrayList<CrawlingDto> target, ArrayList<percentDto> percentArray, 
+            ArrayList<CompetitorDto> competitorArray) throws MessagingException, IOException {
 
-        if (!sendMail.isEmpty()) {
-            StringBuilder emailBody = new StringBuilder("최저가 한도 초과 제품 발생:<br><br>");
-            int count = 1;
-            for (CrawlingDto dto : sendMail) {
-                emailBody.append(count).append(". <a href=\"")
-                        .append(dto.getLink())
-                        .append("\">")
-                        .append(dto.getName())
-                        .append("</a> : ")
-                        .append(dto.getPrice())
-                        .append(" 원<br>");
-                count++;
-            }
+			ArrayList<CrawlingDto> sendMail = new ArrayList<>();
+			for (CrawlingDto e : target) {
+				if (!e.isOK()) {
+					sendMail.add(e);
+				}
+			}
+			
+			if (!sendMail.isEmpty()) {
+				StringBuilder emailBody = new StringBuilder("최저가 한도 초과 제품 발생:<br><br>");
+				int count = 1;
+				for (CrawlingDto dto : sendMail) {
+					 emailBody.append(count).append(". <a href=\"")
+					         .append(dto.getLink())
+					         .append("\">")
+					         .append(dto.getName())
+					         .append("</a> : ")
+					         .append(dto.getPrice())
+					         .append(" 원<br>");
+					 count++;
+				}
+				
+					// 차트 이미지 생성
+					byte[] chartImage = ChartUtil.createChartImage(percentArray);
+					byte[] competitorChartImage = ChartUtil.createCompetitorChartImage(competitorArray);
+					
+					// JavaMailSender 설정
+					JavaMailSender mailSender = createJavaMailSender();
+					MimeMessage message = mailSender.createMimeMessage();
+					MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+					helper.setFrom("jinsoo4735@naver.com"); // 네이버 smtp의 경우 보내는 사람의 이메일을 적어주어야 함
+					
+					// 이메일 설정
+					helper.setTo("jsmoon@dltc.co.kr");
+					helper.setSubject("최저가 한도 초과 제품 발생");
+					
+					// 이메일 본문에 이미지 포함
+					String cid1 = ContentIdGenerator.getContentId();
+					String cid2 = ContentIdGenerator.getContentId();
+					helper.setText(emailBody.toString() + "<br><img src='cid:" + cid1 + "'><br><br><img src='cid:" + cid2 + "'><br>", true);
+					InputStreamSource imageSource1 = new ByteArrayResource(chartImage);
+					InputStreamSource imageSource2 = new ByteArrayResource(competitorChartImage);
+					helper.addInline(cid1, imageSource1, "image/png");
+					helper.addInline(cid2, imageSource2, "image/png");
+					
+					// 이메일 전송
+					mailSender.send(message);
+				}
+		}
 
-            // 차트 이미지 생성
-            byte[] chartImage = ChartUtil.createChartImage(percentArray);
-
-            // JavaMailSender 설정
-            JavaMailSender mailSender = createJavaMailSender();
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-            helper.setFrom("jinsoo4735@naver.com"); // 네이버 smtp의 경우 보내는 사람의 이메일을 적어주어야 함
-            
-            // 이메일 설정
-            helper.setTo("jsmoon@dltc.co.kr");
-            helper.setSubject("최저가 한도 초과 제품 발생");
-            
-            // 이메일 본문에 이미지 포함
-            String cid = ContentIdGenerator.getContentId();
-            helper.setText(emailBody.toString() + "<br><img src='cid:" + cid + "'><br>", true);
-            InputStreamSource imageSource = new ByteArrayResource(chartImage);
-            helper.addInline(cid, imageSource, "image/png");
-
-            // 이메일 전송
-            mailSender.send(message);
-        }
-    }
     
     
     private ArrayList<percentDto> analizePercent(ArrayList<CrawlingDto> target){

@@ -89,12 +89,19 @@ public class CompetitorService {
                 } else if (searchType.equals("coupang")) {
                     temp.addAll(searchCoupang(competitorCode));
                 }
+                int lowerBound = e.getPrice()-e.getSearchLimit();
+                int upperBound = e.getPrice()+e.getSearchLimit();
+                
                 for(CrawlingDto e2 : temp) {
                 	if(isValid(e2,competitorsProduct.get(i),competitorsName.get(i))) {
                 		CompetitorDto push = new CompetitorDto(competitorsProduct.get(i),competitorsName.get(i),e2.getSearchFrom(),e2.getPrice());
+                		if(push.getPrice()<lowerBound || push.getPrice()>upperBound) {
+                			continue;
+                		}
                 		result.add(push);
                 	}
                 }
+                
         	}
         }
 		return result;
