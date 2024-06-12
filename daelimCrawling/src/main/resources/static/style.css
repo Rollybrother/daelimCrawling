@@ -1,7 +1,89 @@
 textarea {
-    width:100%;
+    width: 100%;
 }
 
 input[type=submit] {
-    margin-top:10px;
+    margin-top: 10px;
+}
+
+.split {
+    display: flex;
+    flex-direction: row; /* 명시적으로 좌우 배치를 지정 */
+    height: 100vh;
+}
+
+.split > div {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.left {
+    border-right: 1px solid #ddd;
+}
+
+/* 추가된 스타일 */
+table {
+    border-collapse: collapse;
+    width: 100%;
+    border: 1px solid #dee2e6;
+    table-layout: fixed; /* 고정된 테이블 레이아웃 */
+}
+
+th, td {
+    border: 1px solid #dee2e6;
+    padding: 8px;
+    text-align: left; /* 기본적으로 왼쪽 정렬 */
+    word-wrap: break-word;
+    white-space: normal; /* Allow text to wrap */
+}
+
+th {
+    background-color: #f8f9fa;
+}
+
+.table-wrapper {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.product-name {
+    width: 30%;
+}
+
+.date-column {
+    width: 15%;
+}
+
+.price-column {
+    width: 15%;
+}
+
+.competitor-column {
+    width: 15%;
+}
+
+/* afterSearch html에서 가져온 부분 */
+.table-wrapper {
+    max-height: 700px;
+    overflow-y: auto;
+}
+
+.bg-danger {
+    background-color: yellow !important;
+    font-weight: bold;
+    color: black !important;
+}
+
+/* beforeSearch의 dataTable 관련 설정 */
+#dataTable {
+    border-collapse: collapse;
+    width: 100%;
+    border: 1px solid #dee2e6;
+    table-layout: fixed; /* 테이블 레이아웃을 고정 */
+}
+
+/* 특정 테이블(#searchedDataTable) 중앙 정렬 */
+#searchedDataTable th, 
+#searchedDataTable td {
+    text-align: center; /* 가운데 정렬 */
 }

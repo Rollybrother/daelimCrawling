@@ -2,6 +2,7 @@ package com.daelim.crawling.mainProgram;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Properties;
 
@@ -95,10 +96,13 @@ public class CrawlingController {
         }
         ArrayList<DaelimVO> originalList = this.daelimRepository.findAllFromDbCrawling();
         ArrayList<percentDto> percentArray = analizePercent(searchFinalResult);
+        // searchFinalResult를 price 기준으로 오름차순 정렬
+        searchFinalResult.sort(Comparator.comparingInt(CrawlingDto::getPrice));
         
         // 이메일 발송
         sendEmail(searchFinalResult, percentArray,competitorResult);
-
+        
+        
         model.addAttribute("list", originalList);
         model.addAttribute("listAfter", searchFinalResult);
         model.addAttribute("percentArray", percentArray);
@@ -171,7 +175,7 @@ public class CrawlingController {
 					// 이메일 전송
 					mailSender.send(message);
 				}
-		}
+	}
 
     
     

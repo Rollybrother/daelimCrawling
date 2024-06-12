@@ -1,57 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>대림통상 제품가격 크롤링</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We"
           crossorigin="anonymous">
-    <style>
-        .split {
-            display: flex;
-            height: 100vh;
-        }
-        .split > div {
-            flex: 1;
-            overflow-y: auto;
-        }
-        .left {
-            border-right: 1px solid #ddd;
-        }
-        /* 추가된 스타일 */
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            border: 1px solid #dee2e6;
-            table-layout: normal;
-        }
-        th, td {
-            border: 1px solid #dee2e6;
-            padding: 8px;
-            text-align: left;
-            word-wrap: break-word;
-            white-space: normal; /* Allow text to wrap */
-        }
-        th {
-            background-color: #f8f9fa;
-        }
-        .table-wrapper {
-            max-height: 500px;
-            overflow-y: auto;
-        }
-        .product-name {
-            width: 30%;
-        }
-        .date-column {
-            width: 15%;
-        }
-        .price-column {
-            width: 15%;
-        }
-        .competitor-column {
-            width: 15%;
-        }
-    </style>
+	<link href="/style.css" rel="stylesheet">
     <script th:inline="javascript">
         /*<![CDATA[*/
         var percentArray = /*[[${percentArray}]]*/ [];
@@ -68,6 +23,16 @@
 <div class="split">
     <div class="left" th:replace="beforeSearch :: content"></div>
     <div class="right" th:replace="afterSearch :: content"></div>
+</div>
+<!-- 진행 중임을 알리는 팝업 -->
+<div id="loadingPopup" class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <p>진행 중입니다<span id="loadingDots"></span></p>
+            </div>
+        </div>
+    </div>
 </div>
 <!-- 제품등록시 팝업창 html -->
 <div id="productModal" class="modal fade" tabindex="-1">
@@ -86,7 +51,7 @@
                     <div class="mb-3">
                         <label for="productPrice" class="form-label">제품 허용 최저가격:</label>
                         <input type="text" class="form-control" id="productPrice" name="productPrice">
-						<label for="searchLimit" class="form-label">가격 검색범위 &plusmn :</label>
+                        <label for="searchLimit" class="form-label">가격 검색범위 &plusmn :</label>
                         <input type="text" class="form-control" id="searchLimit" name="searchLimit">
                     </div>
                     <div class="mb-3">
