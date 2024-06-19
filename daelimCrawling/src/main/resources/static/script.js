@@ -1,9 +1,13 @@
 // 전역변수 선언
 let isAutoSearchEnabled = false;
 let intervalDays = 1;
-
+// 자동 검색 기능 설정
+let autoSearchTimeoutId;
 //여기서부터 등록된 제품에 대한 검색기능
 let allRows = [];
+
+//여기는 전체보기 기능의 체크상태를 표시하기 위한 변수
+var originalRows;
 // 검색 기능
 function filterByName() {
     let keyword = $('#searchKeyword').val().toLowerCase();
@@ -14,12 +18,46 @@ function filterByName() {
 
 // 전체보기 기능
 function showAll() {
+    // 현재 체크된 상태를 저장
+    var checkedStates = {};
+    $('#dataTable tbody tr').each(function(index, row) {
+        var checkbox = $(row).find('.rowCheckbox');
+        if (checkbox.prop('checked')) {
+            checkedStates[index] = true;
+        }
+    });
+
     $('#searchKeyword').val('');
-    $('#dataTable tbody').empty().append(allRows.clone());
+    $('#dataTable tbody').empty().append(originalRows.clone());
+
+    // 저장된 체크 상태를 다시 적용
+    $('#dataTable tbody tr').each(function(index, row) {
+        if (checkedStates[index]) {
+            $(row).find('.rowCheckbox').prop('checked', true);
+        }
+    });
+
+    // 행 수 체크하여 스크롤 추가
+    checkTableRows();
+}
+
+// 테이블 행 수 체크하여 스크롤 추가하는 함수
+function checkTableRows() {
+    const rowCount = $('#dataTable tbody tr').length;
+    const maxRows = 4;
+    const wrapper = $('#dataTableWrapper');
+
+    if (rowCount > maxRows) {
+        wrapper.css('max-height', '200px');
+        wrapper.css('overflow-y', 'auto');
+    } else {
+        wrapper.css('max-height', '');
+        wrapper.css('overflow-y', '');
+    }
 }
 
 // 등록제품에 대한 검색과 전체보기 기능 종료
-//여기서부터 페이징 구현 시작
+// 여기서부터 페이징 구현 시작
 let currentPage = 1;
 const rowsPerPage = 10;
 let totalRows = document.querySelectorAll('#searchedDataTable tbody tr').length;
@@ -30,6 +68,7 @@ function displayRows() {
     rows.forEach((row, index) => {
         row.style.display = (index >= (currentPage - 1) * rowsPerPage && index < currentPage * rowsPerPage) ? '' : 'none';
     });
+    updatePagination();
 }
 
 function goToPage(page) {
@@ -57,10 +96,48 @@ function nextPage() {
     }
 }
 
+function updatePagination() {
+    const pagination = document.querySelector('.pagination');
+    pagination.innerHTML = `
+        <li class="page-item">
+            <a class="page-link" href="#" aria-label="Previous" onclick="goToPage('first')">
+                <span aria-hidden="true"><<</span>
+            </a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="#" aria-label="Previous" onclick="previousPage()">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+    `;
+
+    for (let i = 1; i <= totalPages; i++) {
+        pagination.innerHTML += `
+            <li class="page-item ${i === currentPage ? 'active' : ''}">
+                <a class="page-link" href="#" onclick="goToPage(${i})">${i}</a>
+            </li>
+        `;
+    }
+
+    pagination.innerHTML += `
+        <li class="page-item">
+            <a class="page-link" href="#" aria-label="Next" onclick="nextPage()">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="#" aria-label="Next" onclick="goToPage('last')">
+                <span aria-hidden="true">>></span>
+            </a>
+        </li>
+    `;
+}
+
 // 초기 로딩 시 첫 페이지 표시
 document.addEventListener('DOMContentLoaded', function() {
     displayRows();
 });
+
 
 // 페이징 구현종료
 
@@ -139,6 +216,9 @@ function addRow() {
                     allRows = $('#dataTable tbody tr').clone();
 
                     modal.hide(); // 성공적으로 추가된 후 모달 닫기
+
+                    // 행 수 체크하여 스크롤 추가
+                    checkTableRows();
                 },
                 error: function(error) {
                     alert("데이터 추가 중 오류가 발생했습니다.");
@@ -147,6 +227,21 @@ function addRow() {
         } else {
             alert("제품 이름과 가격을 모두 입력해야 합니다.");
         }
+    }
+}
+
+// 테이블 행 수 체크하여 스크롤 추가하는 함수
+function checkTableRows() {
+    const rowCount = $('#dataTable tbody tr').length;
+    const maxRows = 3;
+    const wrapper = $('#dataTableWrapper');
+
+    if (rowCount > maxRows) {
+        wrapper.css('max-height', '200px');
+        wrapper.css('overflow-y', 'auto');
+    } else {
+        wrapper.css('max-height', '');
+        wrapper.css('overflow-y', '');
     }
 }
 
@@ -250,26 +345,24 @@ $(document).on('hide.bs.modal', '#loadingPopup', function () {
 });
 
 
-// 자동 검색 기능 설정
-let autoSearchTimeoutId;
 
 function calculateNextTimeout() {
     const now = new Date();
-    const nextRun = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 17, 24, 0, 0); // 다음 13:08
+    const nextRun = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 0, 0, 0); // 다음 13:08
 
     if (now > nextRun) {
-        nextRun.setDate(nextRun.getDate() + 1); // 오늘 13:08이 이미 지났다면 다음 날로 설정
+      nextRun.setDate(nextRun.getDate() + intervalDays); // 오늘 13:08이 이미 지났다면 다음 주기로 지정
     }
-
-    return nextRun - now; // 밀리초 단위 시간 차이 반환
+    return nextRun - now; 
 }
 
 
 function setAutoSearch() {
     console.log("자동검색 설정");
     isAutoSearchEnabled = $('#autoSearchToggle').is(':checked');
-    intervalDays = parseInt($('#autoSearchInterval').val(), 10);
+	intervalDays = parseInt($('#autoSearchInterval').val(), 10);
 
+	
     // intervalDays가 NaN인지 확인하고 기본값 설정
     if (isNaN(intervalDays) || intervalDays <= 0) {
         intervalDays = 1;
@@ -277,28 +370,60 @@ function setAutoSearch() {
 
     if (isAutoSearchEnabled) {
         const timeout = calculateNextTimeout();
-        autoSearchTimeoutId = setTimeout(() => {
-            searchChecked();
-            setRecurringSearch(intervalDays);
-        }, timeout);
+		   	if(timeout>0){
+				autoSearchTimeoutId = setTimeout(() => {
+		        searchChecked();
+		        setRecurringSearch(intervalDays);
+		        }, timeout);
+		        console.log(`자동 검색이 ${timeout / 1000}초 후에 실행됩니다.`);
+			}  
+	    } else if (autoSearchTimeoutId) {
+	        clearTimeout(autoSearchTimeoutId);
+	        autoSearchTimeoutId = null; 
+	    }
 
-        console.log(`자동 검색이 ${timeout / 1000}초 후에 실행됩니다.`);
-    } else if (autoSearchTimeoutId) {
-        clearTimeout(autoSearchTimeoutId);
-        autoSearchTimeoutId = null; 
-    }
+    // AJAX 요청 보내기
+    $.ajax({
+        url: '/ajax/updateAutoSearchStatus',
+        type: 'POST',
+        data: { isEnabled: isAutoSearchEnabled, intervalDays: intervalDays },
+        success: function(response) {
+            $('#autoSearchStatus').text(response);
+        },
+        error: function(error) {
+            console.log("Error:", error);
+        }
+    });
 }
 
 function setRecurringSearch(days) {
     if (days > 0) {
-       //const intervalMilliseconds = days * 24 * 60 * 60 * 1000; // 일 단위 간격을 밀리초로 변환
-       const intervalMilliseconds = days *1000*180; // 테스트용
-
+       const intervalMilliseconds = days * 24 * 60 * 60 * 1000; // 일 단위 간격을 밀리초로 변환
         autoSearchTimeoutId = setTimeout(() => {
             searchChecked();
             setRecurringSearch(days);
         }, intervalMilliseconds);
     }
+}
+
+function disableAutoSearch() {
+    if (autoSearchTimeoutId) {
+        clearTimeout(autoSearchTimeoutId);
+        autoSearchTimeoutId = null;
+    }
+
+    // AJAX 요청 보내기
+    $.ajax({
+        url: '/ajax/updateAutoSearchStatus',
+        type: 'POST',
+        data: { isEnabled: false, intervalDays: 0 },
+        success: function(response) {
+            $('#autoSearchStatus').text(response);
+        },
+        error: function(error) {
+            console.log("Error:", error);
+        }
+    });
 }
 
 // 자동 검색 토글 이벤트 핸들러 추가
@@ -308,6 +433,7 @@ $('#autoSearchToggle').change(function() {
     } else if (autoSearchTimeoutId) {
         clearTimeout(autoSearchTimeoutId);
         autoSearchTimeoutId = null; 
+        disableAutoSearch();
     }
 });
 
@@ -421,6 +547,33 @@ function filterData() {
         }
     });
 }
+// 여기부분은 자유검색 시 유효성을 검사하는 부분
+function clearInput() {
+            document.getElementById('productCode').value = '';
+}
+
+function validateForm(event) {
+    event.preventDefault(); // 폼 제출을 막음
+
+    const searchType = document.querySelector('input[name="searchType"]:checked');
+    const productCode = document.getElementById('productCode').value.trim();
+
+    if (!searchType) {
+        alert("쇼핑몰을 지정해주세요");
+        return;
+    }
+
+    if (!productCode) {
+        alert("검색어가 없습니다");
+        return;
+    }
+
+    document.getElementById('mainForm').submit(); // 폼 제출
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('mainForm').addEventListener('submit', validateForm);
+});
 // 3자리마다 컴마를 표시하고 원을 붙임
 document.addEventListener("DOMContentLoaded", function() {
     function formatNumber(num) {
@@ -438,10 +591,120 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 
+// 이 부분은 결과분석에 대해서 검색과 전체보기 기능이 구현된것임
+document.getElementById('searchCompetitorButton').addEventListener('click', function() {
+    var searchQuery = document.getElementById('searchCompetitorBox').value.toLowerCase();
+    var rows = document.querySelectorAll('#competitorTable tbody tr');
+    rows.forEach(function(row) {
+        var productName = row.querySelector('td').textContent.toLowerCase();
+        if (productName.includes(searchQuery)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+});
 
-// 로딩이 완료된 후 메시지 출력 및 자동 검색 설정
+document.getElementById('showAllButton').addEventListener('click', function() {
+    var rows = document.querySelectorAll('#competitorTable tbody tr');
+    rows.forEach(function(row) {
+        row.style.display = '';
+    });
+});
+
+//좌측 검은선의 높이에 우측 검은선의 높이를 맞추는 코드
+document.addEventListener("DOMContentLoaded", function() {
+    // 좌측과 우측 divider 요소 가져오기
+    var leftDivider = document.querySelector(".left .divider");
+    var rightDivider = document.querySelector(".right .divider");
+
+    // 좌측 divider의 위치를 기준으로 우측 divider의 위치 조정
+    function adjustDividerHeight() {
+        var leftDividerTop = leftDivider.getBoundingClientRect().top;
+        var rightContainerTop = document.querySelector(".right").getBoundingClientRect().top;
+
+        // 우측 divider의 위치를 좌측 divider의 위치와 맞추기 위해 상단 여백 조정
+        rightDivider.style.marginTop = (leftDividerTop - rightContainerTop) + 'px';
+    }
+
+    // 페이지 로드 시 초기 조정
+    adjustDividerHeight();
+
+    // 윈도우 크기 조정 시 재조정
+    window.addEventListener("resize", adjustDividerHeight);
+});
+
+
+
 $(document).ready(function() {
-    console.log("Document is ready");
+	// 테이블 전체보기 기능
+	originalRows = $('#dataTable tbody tr').clone();
+	checkTableRows();
+	
+	//도움말 아이콘 기능
+    $('#helpIcon').hover(
+        function() {
+            $('#helpTooltip').css({
+                display: 'block',
+                top: $(this).position().top + 'px',
+                left: ($(this).position().left + $(this).width() + 10) + 'px'
+            });
+        },
+        function() {
+            $('#helpTooltip').css('display', 'none');
+        }
+    );
+	
+	// 테이블 크기를 유지하는 기능
+	const table = document.getElementById('searchedDataTable');
+    const tableBody = document.getElementById('tableBody');
+    const rowCount = tableBody.getElementsByTagName('tr').length;
+    const minRows = 10;
+
+    if (rowCount > 0) {
+        table.style.display = 'table';
+        for (let i = rowCount; i < minRows; i++) {
+            const dummyRow = document.createElement('tr');
+            dummyRow.innerHTML = `
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+            `;
+            tableBody.appendChild(dummyRow);
+        }
+    }
+	
+    var autoSearchEnabled = window.thymeleafData.autoSearchEnabled;
+    var intervalDays = window.thymeleafData.autoSearchInterval;
+    var searchType = window.thymeleafData.searchType;
+    var selectedIndices = window.thymeleafData.indices;
+    /* 차트를 안쓰게 되어서 주석처리
+    var percentArray = window.thymeleafData.percentArray;
+    var competitorResult = window.thymeleafData.competitorResult;*/
+
+    // 검색 타입 설정
+    if (searchType === 'all') {
+        $('#allSearch').prop('checked', true);
+    } else if (searchType === 'naver') {
+        $('#naverSearch').prop('checked', true);
+    } else if (searchType === 'coupang') {
+        $('#coupangSearch').prop('checked', true);
+    }
+
+    // 선택된 인덱스 설정
+    selectedIndices.forEach(function(index) {
+        $('td.clickable').filter(function() {
+            return $(this).text() == index;
+        }).closest('tr').find('.rowCheckbox').prop('checked', true);
+    });
+
+    // 자동 감시 토글 및 주기 설정
+    if (autoSearchEnabled) {
+        $('#autoSearchToggle').prop('checked', true);
+    }
+
+    $('#autoSearchInterval').val(intervalDays);
+
+    // 기존 스크립트 부분
     allRows = $('#dataTable tbody tr').clone();
     $('#mainForm').on('submit', function(event) {
         if (!$('input[name="searchType"]:checked').val()) {
@@ -468,8 +731,8 @@ $(document).ready(function() {
     $('#sortDescButton').click(sortDesc);
     $('#searchButton').click(applySearchFilter);
 
-    // Chart.js를 사용하여 막대 그래프 생성
-    if (percentArray && percentArray.length > 0) {
+    // Chart.js를 사용하여 막대 그래프 생성, 차트 제거됨
+    /*if (percentArray && percentArray.length > 0) {
         var labels = percentArray.map(item => item.shoppingMall);
         var data = percentArray.map(item => item.percent);
 
@@ -534,6 +797,6 @@ $(document).ready(function() {
         });
     } else {
         console.log("No data available for competitor chart.");
-    }
+    }*/
 });
 

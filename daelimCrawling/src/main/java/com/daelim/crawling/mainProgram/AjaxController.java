@@ -13,6 +13,7 @@ import com.daelim.crawling.Daelim.DaelimVO;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/ajax")
@@ -30,7 +31,7 @@ public class AjaxController {
 		}
     	
     	DaelimVO result 
-    	= new DaelimVO(daelimRepository.findIndexByName(product.getName()),product.getName(), product.getPrice(), product.getSearchLimit(),
+    	= new DaelimVO(daelimRepository.findMaxIndex(),product.getName(), product.getPrice(), product.getSearchLimit(),
     			product.getCompetitor1Product(),product.getCompetitor1Name(),product.getCompetitor2Product(),product.getCompetitor2Name());
         return result;
     }
@@ -42,5 +43,12 @@ public class AjaxController {
         } catch (Exception e) {
             System.out.println(e);
         }
+    }
+    
+    @PostMapping("/updateAutoSearchStatus")
+    public String updateAutoSearchStatus(@RequestParam("isEnabled") boolean isEnabled, @RequestParam("intervalDays") int intervalDays) {
+        // 여기서 자동감시 상태를 저장하거나 필요에 따라 처리합니다.
+        // 단순히 상태를 반환하도록 구현합니다.
+        return isEnabled ? "자동감시 중 : " + intervalDays + "일주기" : "";
     }
 }

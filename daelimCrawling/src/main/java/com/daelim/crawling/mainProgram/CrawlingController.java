@@ -1,9 +1,11 @@
 package com.daelim.crawling.mainProgram;
 
 import java.io.IOException;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Properties;
 
 import org.springframework.context.annotation.ComponentScan;
@@ -42,10 +44,8 @@ public class CrawlingController {
         ArrayList<DaelimVO> list = this.daelimRepository.findAllFromDbCrawling();
         model.addAttribute("list", list);
         
-        // 추가: `afterSearch`의 기본 데이터를 추가하여 모델에 추가
         ArrayList<CrawlingDto> result = new ArrayList<>();  // 기본적으로 빈 리스트를 사용하거나 필요 시 기본 데이터를 추가
         model.addAttribute("listAfter", result); 
-        
         return "splitView"; 
     }
     
@@ -102,7 +102,6 @@ public class CrawlingController {
         // 이메일 발송
         sendEmail(searchFinalResult, percentArray,competitorResult);
         
-        
         model.addAttribute("list", originalList);
         model.addAttribute("listAfter", searchFinalResult);
         model.addAttribute("percentArray", percentArray);
@@ -113,8 +112,8 @@ public class CrawlingController {
         model.addAttribute("competitorResult", competitorResult); 
         return "splitView";
     }
-
-
+    
+    
     @GetMapping("/afterSearch")
     public String afterList(@RequestParam("productCode") String productCode, 
                             @RequestParam("searchType") String searchType, Model model) {
@@ -128,56 +127,70 @@ public class CrawlingController {
     private void sendEmail(ArrayList<CrawlingDto> target, ArrayList<percentDto> percentArray, 
             ArrayList<CompetitorDto> competitorArray) throws MessagingException, IOException {
 
-			ArrayList<CrawlingDto> sendMail = new ArrayList<>();
-			for (CrawlingDto e : target) {
-				if (!e.isOK()) {
-					sendMail.add(e);
-				}
-			}
-			
-			if (!sendMail.isEmpty()) {
-				StringBuilder emailBody = new StringBuilder("최저가 한도 초과 제품 발생:<br><br>");
-				int count = 1;
-				for (CrawlingDto dto : sendMail) {
-					 emailBody.append(count).append(". <a href=\"")
-					         .append(dto.getLink())
-					         .append("\">")
-					         .append(dto.getName())
-					         .append("</a> : ")
-					         .append(dto.getPrice())
-					         .append(" 원<br>");
-					 count++;
-				}
-				
-					// 차트 이미지 생성
-					byte[] chartImage = ChartUtil.createChartImage(percentArray);
-					byte[] competitorChartImage = ChartUtil.createCompetitorChartImage(competitorArray);
-					
-					// JavaMailSender 설정
-					JavaMailSender mailSender = createJavaMailSender();
-					MimeMessage message = mailSender.createMimeMessage();
-					MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-					helper.setFrom("jinsoo4735@naver.com"); // 네이버 smtp의 경우 보내는 사람의 이메일을 적어주어야 함
-					
-					// 이메일 설정
-					helper.setTo("jsmoon@dltc.co.kr");
-					helper.setSubject("최저가 한도 초과 제품 발생");
-					
-					// 이메일 본문에 이미지 포함
-					String cid1 = ContentIdGenerator.getContentId();
-					String cid2 = ContentIdGenerator.getContentId();
-					helper.setText(emailBody.toString() + "<br><img src='cid:" + cid1 + "'><br><br><img src='cid:" + cid2 + "'><br>", true);
-					InputStreamSource imageSource1 = new ByteArrayResource(chartImage);
-					InputStreamSource imageSource2 = new ByteArrayResource(competitorChartImage);
-					helper.addInline(cid1, imageSource1, "image/png");
-					helper.addInline(cid2, imageSource2, "image/png");
-					
-					// 이메일 전송
-					mailSender.send(message);
-				}
-	}
+        ArrayList<CrawlingDto> sendMail = new ArrayList<>();
+        for (CrawlingDto e : target) {
+            if (!e.isOK()) {
+                sendMail.add(e);
+            }
+        }
+        
+        if (!sendMail.isEmpty()) {
+            StringBuilder emailBody = new StringBuilder("최저가 한도 초과 제품 발생:<br><br>");
+            int count = 1;
+            for (CrawlingDto dto : sendMail) {
+                 emailBody.append(count).append(". <a href=\"")
+                         .append(dto.getLink())
+                         .append("\">")
+                         .append(dto.getName())
+                         .append("</a> : ")
+                         .append(dto.getPrice())
+                         .append(" 원<br>");
+                 count++;
+            }
 
-    
+            // percentArray 테이블 추가
+            emailBody.append("<br><br><table border='1'><tr><th>쇼핑몰 이름</th><th>위반 비율</th></tr>");
+            for (percentDto percent : percentArray) {
+                emailBody.append("<tr>")
+                         .append("<td>").append(percent.getShoppingMall()).append("</td>")
+                         .append("<td>").append(percent.getPercent()).append("% (")
+                         .append(percent.getDenominator()).append("건 중 ")
+                         .append(percent.getNumerator()).append("건)").append("</td>")
+                         .append("</tr>");
+            }
+            emailBody.append("</table>");
+
+            // competitorArray 테이블 추가
+            emailBody.append("<br><br><table border='1'><tr><th>(경쟁제품, 쇼핑몰)</th><th>평균가격</th></tr>");
+            NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.KOREA);
+            for (CompetitorDto competitor : competitorArray) {
+                String formattedPrice = numberFormat.format(competitor.getAveragePrice()) + "원";
+                emailBody.append("<tr>")
+                         .append("<td>(").append(competitor.getProductName()).append(", ")
+                         .append(competitor.getShoppingMall()).append(")</td>")
+                         .append("<td>").append(formattedPrice).append("</td>")
+                         .append("</tr>");
+            }
+            emailBody.append("</table>");
+
+            // JavaMailSender 설정
+            JavaMailSender mailSender = createJavaMailSender();
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom("jinsoo4735@naver.com"); // 네이버 smtp의 경우 보내는 사람의 이메일을 적어주어야 함
+            
+            // 이메일 설정
+            helper.setTo("jsmoon@dltc.co.kr");
+            helper.setSubject("최저가 한도 초과 제품 발생");
+            
+            // 이메일 본문 설정
+            helper.setText(emailBody.toString(), true);
+
+            // 이메일 전송
+            mailSender.send(message);
+        }
+    }
+
     
     private ArrayList<percentDto> analizePercent(ArrayList<CrawlingDto> target){
 		HashSet<String> set = new HashSet<>();
@@ -198,10 +211,11 @@ public class CrawlingController {
 				}
 			}
 			int ratio = (int)((falseCase/totalSize)*100);
-			result.add(new percentDto(e, ratio));
+			result.add(new percentDto(e, ratio, falseCase, totalSize));
 		}
        return result; 
     }
+    
     
     private JavaMailSender createJavaMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
@@ -219,4 +233,5 @@ public class CrawlingController {
         props.put("mail.smtp.ssl.enable", "true");
         return mailSender;
     }
+    
 }

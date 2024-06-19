@@ -7,6 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We"
           crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         table {
             border-collapse: collapse;
@@ -40,8 +41,51 @@
         .competitor-column {
             width: 15%;
         }
+        /* 추가된 스타일 */
+        #dataTableWrapper {
+            max-height: 200px; /* 5개 이상의 행에 대한 최대 높이 설정 */
+            overflow-y: auto;
+        }
+        /* 구분선을 위한 스타일 */
+        .divider {
+            border-top: 2px solid #000000; /* 색상을 검은색으로 변경 */
+            margin: 40px 0;
+        }
+        /* 도움말 아이콘 스타일 */
+        .help-icon {
+            display: inline-block;
+            color: #007bff;
+            font-size: 1.2em;
+            cursor: pointer;
+            margin-left: 10px;
+            position: relative;
+        }
+        .help-tooltip {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 30px; /* 아이콘 옆에 표시되도록 설정 */
+            width: 250px;
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 1000;
+        }
+        .help-tooltip::after {
+            content: "";
+            position: absolute;
+            top: 10px; /* 삼각형의 위치를 변경 */
+            left: -10px; /* 삼각형을 왼쪽으로 이동 */
+            border-width: 5px;
+            border-style: solid;
+            border-color: transparent #333 transparent transparent;
+        }
     </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        
+    </script>
 </head>
 <body>
 <div th:fragment="content" class="container mt-4">
@@ -67,7 +111,7 @@
       
         <div class="mb-3 mt-3">
             <label for="productCode" class="form-label">쇼핑몰 검색어 입력:</label>
-            <input type="text" id="productCode" name="productCode" class="form-control" placeholder="체크박스 검색 안쓸 때 쓰십시오">
+            <input type="text" id="productCode" name="productCode" class="form-control" placeholder="모든 검색어 자유검색 기능입니다">
         </div>
         <button type="submit" class="btn btn-primary">검색</button>
         <button type="button" class="btn btn-secondary" onclick="clearInput()">지우기</button>
@@ -81,7 +125,7 @@
     </div>
 
     <form id="searchCheckedForm" action="/crawling/searchChecked" method="post" class="mb-4">
-        <div class="table-wrapper">
+        <div id="dataTableWrapper">
             <table class="table table-bordered" id="dataTable">
                 <thead>
                     <tr>
@@ -89,29 +133,29 @@
                         <th scope="col">구분</th>
                         <th scope="col">검색대상 제품</th>
                         <th scope="col">허용 최저가격</th>
-						<th scope="col">가격 검색범위 &plusmn</th>
+                        <th scope="col">가격 검색범위 &plusmn</th>
                         <th scope="col" colspan="2">경쟁사 제품 1</th>
                         <th scope="col" colspan="2">경쟁사 제품 2</th>
                     </tr>
                 </thead>
-				
-				<tbody>
-				    <tr th:each="item : ${list}">
-				        <td><input type="checkbox" class="rowCheckbox"></td>
-				        <td class="clickable" th:data-slipno="${item.index}" th:data-acdate="${item.index}" th:text="${item.index}">구분</td>
-				        <td class="clickable product-name" th:data-slipno="${item.name}" th:data-acdate="${item.name}" th:text="${item.name}">검색대상 제품</td>
-				        <td class="clickable" th:data-slipno="${item.price}" th:data-acdate="${item.price}">
-				            <span class="price" th:data-price="${item.price}" th:text="${item.price}"></span> 원
-				        </td>
-				        <td class="clickable" th:data-slipno="${item.searchLimit}" th:data-acdate="${item.searchLimit}">
-				            <span class="searchLimit" th:data-limit="${item.searchLimit}" th:text="${item.searchLimit}"></span> 원
-				        </td>
-				        <td class="clickable competitor-column" th:data-slipno="${item.competitor1Product}" th:data-acdate="${item.competitor1Product}" th:text="${item.competitor1Product}">경쟁사 제품 1</td>
-				        <td class="clickable competitor-column" th:data-slipno="${item.competitor1Name}" th:data-acdate="${item.competitor1Name}" th:text="${item.competitor1Name}">경쟁사1 이름</td>
-				        <td class="clickable competitor-column" th:data-slipno="${item.competitor2Product}" th:data-acdate="${item.competitor2Product}" th:text="${item.competitor2Product}">경쟁사 제품 2</td>
-				        <td class="clickable competitor-column" th:data-slipno="${item.competitor2Name}" th:data-acdate="${item.competitor2Name}" th:text="${item.competitor2Name}">경쟁사2 이름</td>
-				    </tr>
-				</tbody>
+                
+                <tbody>
+                    <tr th:each="item : ${list}">
+                        <td><input type="checkbox" class="rowCheckbox"></td>
+                        <td class="clickable" th:data-slipno="${item.index}" th:data-acdate="${item.index}" th:text="${item.index}">구분</td>
+                        <td class="clickable product-name" th:data-slipno="${item.name}" th:data-acdate="${item.name}" th:text="${item.name}">검색대상 제품</td>
+                        <td class="clickable" th:data-slipno="${item.price}" th:data-acdate="${item.price}">
+                            <span class="price" th:data-price="${item.price}" th:text="${item.price}"></span> 원
+                        </td>
+                        <td class="clickable" th:data-slipno="${item.searchLimit}" th:data-acdate="${item.searchLimit}">
+                            <span class="searchLimit" th:data-limit="${item.searchLimit}" th:text="${item.searchLimit}"></span> 원
+                        </td>
+                        <td class="clickable competitor-column" th:data-slipno="${item.competitor1Product}" th:data-acdate="${item.competitor1Product}" th:text="${item.competitor1Product}">경쟁사 제품 1</td>
+                        <td class="clickable competitor-column" th:data-slipno="${item.competitor1Name}" th:data-acdate="${item.competitor1Name}" th:text="${item.competitor1Name}">경쟁사1 이름</td>
+                        <td class="clickable competitor-column" th:data-slipno="${item.competitor2Product}" th:data-acdate="${item.competitor2Product}" th:text="${item.competitor2Product}">경쟁사 제품 2</td>
+                        <td class="clickable competitor-column" th:data-slipno="${item.competitor2Name}" th:data-acdate="${item.competitor2Name}" th:text="${item.competitor2Name}">경쟁사2 이름</td>
+                    </tr>
+                </tbody>
 
             </table>
         </div>
@@ -125,9 +169,14 @@
         <div class="form-check form-switch mt-3">
             <input class="form-check-input" type="checkbox" id="autoSearchToggle">
             <label class="form-check-label" for="autoSearchToggle">실시간 자동감시 활성화</label>
+            <div class="help-icon" id="helpIcon"><i class="fas fa-question-circle"></i></div>
+            <div class="help-tooltip" id="helpTooltip">자동감시는 먼저 기간을 설정하고 활성화를 해야 합니다. 
+			활성화 이후에 기간설정을 바꾸면 그 부분이 반영되지 않으니 비활성화 후 기간변경을 하고 다시 활성화 해주세요. 
+			자동감시는 주기에 따라 아침 10시에 선택항목에 대해서 실행됩니다.</div>
         </div>
         <div class="mt-2">
             <label for="autoSearchInterval" class="form-label">자동감시 주기:</label>
+			<span id="autoSearchStatus" class="text-primary ms-3"></span> 
             <select id="autoSearchInterval" class="form-select w-auto">
                 <option value="1">하루</option>
                 <option value="3">3일</option>
@@ -137,17 +186,20 @@
             </select>
         </div>
 
+        <!-- 구분선을 위한 div 추가 -->
+        <div class="divider"></div>
+		
         <!-- 과거 검색기록 섹션 시작 -->
         <div class="mt-4">
             <h3>과거기록 조회</h3>
             <div class="mb-3">
                 <label for="searchDate" class="form-label">날짜 선택:</label>
                 <input type="date" id="searchDate" name="searchDate" class="form-control w-auto d-inline">
-				<!-- 검색 버튼에 onclick 이벤트 추가 -->
-				<button type="button" class="btn btn-primary ms-3" onclick="searchPast()">해당날짜 검색</button>
+                <!-- 검색 버튼에 onclick 이벤트 추가 -->
+                <button type="button" class="btn btn-primary ms-3" onclick="searchPast()">해당날짜 검색</button>
                 <label for="pastSearchKeyword" class="form-label ms-3">조회결과 검색필터</label>
                 <input type="text" id="pastSearchKeyword" name="pastSearchKeyword" class="form-control w-auto d-inline">
-				<button type="button" class="btn btn-primary ms-3" onclick="filterData()">검색필터 적용</button>
+                <button type="button" class="btn btn-primary ms-3" onclick="filterData()">검색필터 적용</button>
             </div>
             <div class="table-wrapper">
                 <table class="table table-bordered" id="pastDataTable">

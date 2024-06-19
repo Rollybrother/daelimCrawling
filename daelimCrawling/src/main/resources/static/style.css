@@ -82,8 +82,72 @@ th {
     table-layout: fixed; /* 테이블 레이아웃을 고정 */
 }
 
-/* 특정 테이블(#searchedDataTable) 중앙 정렬 */
+#dataTableWrapper {
+    max-height: 180px;
+    overflow-y: auto;
+    height: 180px; 
+}
+
+/* 검색결과테이블 관련 설정 */
 #searchedDataTable th, 
 #searchedDataTable td {
     text-align: center; /* 가운데 정렬 */
+}
+#searchedDataTable {
+    display: table;
+    width: 100%;
+    height: 457px; /* 고정된 높이 설정 */
+    overflow-y: auto;
+    table-layout: fixed; /* 테이블 레이아웃 고정 */
+}
+
+#searchedDataTable tbody {
+    height: 457px; /* 고정된 높이 설정 */
+    display: block;
+}
+
+#searchedDataTable thead, #searchedDataTable tbody tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+#searchedDataTable tbody td, #searchedDataTable thead th {
+    width: 50%; /* 각 셀의 너비를 50%로 설정 */
+}
+
+/* 도움말 아이콘 스타일 */
+.help-icon {
+    display: inline-block;
+    color: #007bff;
+    font-size: 1.2em;
+    cursor: pointer;
+    margin-left: 10px;
+    position: relative;
+}
+.help-tooltip {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 25px; /* 아이콘 옆에 표시되도록 설정 */
+    width: 250px;
+    background-color: #333;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 1000;
+}
+.help-tooltip::after {
+    content: "";
+    position: absolute;
+    top: 10px; /* 삼각형의 위치를 변경 */
+    left: -10px; /* 삼각형을 왼쪽으로 이동 */
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent #333 transparent transparent;
+}
+/*구분선 위치 맞춤*/
+.divider {
+    border-top: 2px solid #000000; /* 색상을 검은색으로 변경 */
+    margin: 40px 0;
 }

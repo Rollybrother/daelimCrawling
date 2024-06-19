@@ -32,5 +32,9 @@ public interface DaelimRepository extends JpaRepository<DaelimVO,Integer>{
 	@Modifying
     @Query(value = "DELETE FROM db_crawling WHERE `index` IN (:indices)", nativeQuery = true)
     void deleteByIndices(@Param("indices") List<Integer> indices);
+	
+	// 가장 큰 index 값을 가져오는 메서드 추가
+    @Query(value = "SELECT MAX(`index`) FROM db_crawling", nativeQuery = true)
+    Integer findMaxIndex();
 }
 

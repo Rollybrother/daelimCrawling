@@ -77,18 +77,19 @@ public class CrawlingService {
 		}else if(searchType.equals("coupang")) {
 			temp.addAll(searchCoupang(productCode));
 		}
-		ArrayList<CrawlingDto> result = new ArrayList<>();
-		for(CrawlingDto e : temp) {
-			if(isValid(e,productCode)) {
-				LocalDate today = LocalDate.now();
-		        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
-		        String formattedDate = today.format(formatter);
-				e.setDate(formattedDate);
-				result.add(e);
-			}
-		}
-		crawlingHistoryService.insert(result);
-		return result;
+//		ArrayList<CrawlingDto> result = new ArrayList<>();
+//		for(CrawlingDto e : temp) {
+//			if(isValid(e,productCode)) {
+//				LocalDate today = LocalDate.now();
+//		        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+//		        String formattedDate = today.format(formatter);
+//				e.setDate(formattedDate);
+//				result.add(e);
+//			}
+//		} 
+//		crawlingHistoryService.insert(result);
+		// 자유검색을 위해 유효성 함수 해제
+		return temp;
 	}
 	
 	public boolean isValid(CrawlingDto e,String searchTarget) {
@@ -115,7 +116,8 @@ public class CrawlingService {
 	    ChromeOptions options = new ChromeOptions();
 	    ArrayList<CrawlingDto> result = new ArrayList<>();
 
-	    for (int i = 1; i <= 3; i++) {
+	    for (int i = 1; i <= 5; i++) {
+	    	int count = 0;
 	        WebDriver driver = null;
 	        try {
 	            driver = new ChromeDriver(options);
@@ -174,14 +176,17 @@ public class CrawlingService {
 	                    String productPrice = priceElement.getText();
 	                    int intPrice = StoI(productPrice);
 
-	                    // 링크 Url 추출 (XPath 사용하여 span 태그의 data-adsplatform 속성 파싱)
 	                 // 링크 Url 추출
 	                    WebElement linkElement = productElement.findElement(By.cssSelector("a"));
 	                    String productUrl = linkElement.getAttribute("href");
 
 	                    // CrawlingDto 객체에 저장 (CrawlingDto 클래스는 미리 정의되어 있어야 함)
 	                    CrawlingDto productData = new CrawlingDto(productName, intPrice, productUrl,"coupang");
-	                    productDatas.add(productData);
+	                    if(isValid(productData, target)) {
+	                    	productDatas.add(productData);
+	                    	count++;
+	                    }
+	                    
 	                } catch (Exception e) {
 	                    System.out.println(e);
 	                    // 데이터 추출 실패 시 예외 처리 (continue로 다음 제품으로 넘어감)
@@ -199,8 +204,11 @@ public class CrawlingService {
 	                driver.quit();
 	            }
 	        }
+	        if(count==0) {
+	        	break;
+	        }
 	    }
-
+	    
 	    // 결과 반환
 	    return result;
 	}
@@ -213,7 +221,8 @@ public class CrawlingService {
         // options.addArguments("--headless");  // 창을 열지 않음
         WebDriver driver = new ChromeDriver(options);
         ArrayList<CrawlingDto> result = new ArrayList<>();
-        for(int i=1;i<=3;i++) {
+        for(int i=1;i<=10;i++) {
+        	int count = 0;
         	// 2. 웹 페이지 접속
             String baseUrl = "https://search.shopping.naver.com/search/all?adQuery="
                             + target + "&origQuery="
@@ -275,17 +284,21 @@ public class CrawlingService {
                     
                     // CrawlingDto 객체에 저장 (CrawlingDto 클래스는 미리 정의되어 있어야 함)
                     CrawlingDto productData = new CrawlingDto(productName, intPrice,productUrl,"naver");
-                    productDatas.add(productData);
+                    if(isValid(productData, target)) {
+                    	count++;
+                    	productDatas.add(productData);
+                    }
                 } catch (Exception e) {
                     // 데이터 추출 실패 시 예외 처리 (continue로 다음 제품으로 넘어감)
                     continue;
                 }
             }
-
-            // 브라우저 닫기
             
             for(CrawlingDto e : productDatas) {
             	result.add(e);
+            }
+            if(count==0) {
+            	break;
             }
         }
         driver.quit();

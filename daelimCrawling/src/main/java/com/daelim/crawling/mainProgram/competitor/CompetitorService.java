@@ -80,14 +80,15 @@ public class CompetitorService {
         	for(int i=0;i<competitorsProduct.size();i++) {
         		
         		String competitorCode = competitorsProduct.get(i);
+        		String competitorName = competitorsName.get(i);
                 if (searchType.equals("all")) {
-                    temp.addAll(searchNaver(competitorCode));
-                    temp.addAll(searchCoupang(competitorCode));
+                    temp.addAll(searchNaver(competitorCode,competitorName));
+                    temp.addAll(searchCoupang(competitorCode,competitorName));
                     // 여기 쇼핑몰 목록 추가
                 } else if (searchType.equals("naver")) {
-                    temp.addAll(searchNaver(competitorCode));
+                    temp.addAll(searchNaver(competitorCode,competitorName));
                 } else if (searchType.equals("coupang")) {
-                    temp.addAll(searchCoupang(competitorCode));
+                    temp.addAll(searchCoupang(competitorCode,competitorName));
                 }
                 int lowerBound = e.getPrice()-e.getSearchLimit();
                 int upperBound = e.getPrice()+e.getSearchLimit();
@@ -116,20 +117,18 @@ public class CompetitorService {
 	    }
 	    String name = e.getName();
 	    if (name.contains(competitorName)) {
-	        if (name.contains("부품")) {
-	            return false;
-	        }
 	        return true;
 	    }
 	    return false;
 	}
-	public ArrayList<CrawlingDto> searchCoupang(String target) {
+	public ArrayList<CrawlingDto> searchCoupang(String target,String competitorName) {
 	    // 1. 웹 드라이버 설정
 	    System.setProperty("webdriver.chrome.driver", "driver/chromedriver.exe");
 	    ChromeOptions options = new ChromeOptions();
 	    ArrayList<CrawlingDto> result = new ArrayList<>();
 
-	    for (int i = 1; i <= 3; i++) {
+	    for (int i = 1; i <= 5; i++) {
+	    	int count = 0;
 	        WebDriver driver = null;
 	        try {
 	            driver = new ChromeDriver(options);
@@ -195,7 +194,11 @@ public class CompetitorService {
 
 	                    // CrawlingDto 객체에 저장 (CrawlingDto 클래스는 미리 정의되어 있어야 함)
 	                    CrawlingDto productData = new CrawlingDto(productName, intPrice, productUrl,"coupang");
-	                    productDatas.add(productData);
+	                    if(isValid(productData, target, competitorName)) {
+	                    	count++;
+	                    	productDatas.add(productData);
+	                    }
+	                    
 	                } catch (Exception e) {
 	                    System.out.println(e);
 	                    // 데이터 추출 실패 시 예외 처리 (continue로 다음 제품으로 넘어감)
@@ -213,6 +216,9 @@ public class CompetitorService {
 	                driver.quit();
 	            }
 	        }
+	        if(count==0) {
+	        	break;
+	        }
 	    }
 
 	    // 결과 반환
@@ -220,14 +226,15 @@ public class CompetitorService {
 	}
 
 	
-	public ArrayList<CrawlingDto> searchNaver(String target) {
+	public ArrayList<CrawlingDto> searchNaver(String target,String competitorName) {
         // 1. 웹 드라이버와 크롬 드라이버 설정
         System.setProperty("webdriver.chrome.driver", "driver/chromedriver.exe");
         ChromeOptions options = new ChromeOptions();
         // options.addArguments("--headless");  // 창을 열지 않음
         WebDriver driver = new ChromeDriver(options);
         ArrayList<CrawlingDto> result = new ArrayList<>();
-        for(int i=1;i<=3;i++) {
+        for(int i=1;i<=10;i++) {
+        	int count = 0;
         	// 2. 웹 페이지 접속
             String baseUrl = "https://search.shopping.naver.com/search/all?adQuery="
                             + target + "&origQuery="
@@ -289,7 +296,10 @@ public class CompetitorService {
                     
                     // CrawlingDto 객체에 저장 (CrawlingDto 클래스는 미리 정의되어 있어야 함)
                     CrawlingDto productData = new CrawlingDto(productName, intPrice,productUrl,"naver");
-                    productDatas.add(productData);
+                    if(isValid(productData, target, competitorName)) {
+                    	count++;
+                    	productDatas.add(productData);
+                    }
                 } catch (Exception e) {
                     // 데이터 추출 실패 시 예외 처리 (continue로 다음 제품으로 넘어감)
                     continue;
@@ -300,6 +310,9 @@ public class CompetitorService {
             
             for(CrawlingDto e : productDatas) {
             	result.add(e);
+            }
+            if(count == 0) {
+            	break;
             }
         }
         driver.quit();
