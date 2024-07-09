@@ -31,9 +31,9 @@ public class CrawlingHistoryService {
 				finalResult.add(new CrawlingHistoryVO(e.getDate(),e.getName(),e.getPrice(),e.getLink()));
 			}
 		}
-		
 		dao.saveAll(finalResult);
 	}
+	
 	public ArrayList<CrawlingHistoryVO> searchByDate(String date){
 		return dao.findWithDate(date);
 	}

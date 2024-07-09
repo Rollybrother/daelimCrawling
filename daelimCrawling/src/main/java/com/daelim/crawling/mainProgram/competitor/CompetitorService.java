@@ -24,7 +24,7 @@ public class CompetitorService {
 		this.list = list;
 		this.searchType = searchType;
 	}
-
+	
 	public ArrayList<CompetitorDto> finalComputation() {
 	    ArrayList<CompetitorDto> parameter = competitorSearch(this.list, this.searchType);
 	    ArrayList<CompetitorDto> result = new ArrayList<>();
@@ -123,7 +123,7 @@ public class CompetitorService {
 	}
 	public ArrayList<CrawlingDto> searchCoupang(String target,String competitorName) {
 	    // 1. 웹 드라이버 설정
-	    System.setProperty("webdriver.chrome.driver", "driver/chromedriver.exe");
+	    System.setProperty("webdriver.chrome.driver", "C:\\CrawlingProject\\driver\\chromedriver.exe");
 	    ChromeOptions options = new ChromeOptions();
 	    ArrayList<CrawlingDto> result = new ArrayList<>();
 
@@ -228,7 +228,7 @@ public class CompetitorService {
 	
 	public ArrayList<CrawlingDto> searchNaver(String target,String competitorName) {
         // 1. 웹 드라이버와 크롬 드라이버 설정
-        System.setProperty("webdriver.chrome.driver", "driver/chromedriver.exe");
+	    System.setProperty("webdriver.chrome.driver", "C:\\CrawlingProject\\driver\\chromedriver.exe");
         ChromeOptions options = new ChromeOptions();
         // options.addArguments("--headless");  // 창을 열지 않음
         WebDriver driver = new ChromeDriver(options);

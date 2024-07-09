@@ -112,7 +112,7 @@ public class CrawlingService {
 	
 	public ArrayList<CrawlingDto> searchCoupang(String target) {
 	    // 1. 웹 드라이버 설정
-	    System.setProperty("webdriver.chrome.driver", "driver/chromedriver.exe");
+	    System.setProperty("webdriver.chrome.driver", "C:\\CrawlingProject\\driver\\chromedriver.exe");
 	    ChromeOptions options = new ChromeOptions();
 	    ArrayList<CrawlingDto> result = new ArrayList<>();
 
@@ -216,7 +216,7 @@ public class CrawlingService {
 	
 	public ArrayList<CrawlingDto> searchNaver(String target) {
         // 1. 웹 드라이버와 크롬 드라이버 설정
-        System.setProperty("webdriver.chrome.driver", "driver/chromedriver.exe");
+	    System.setProperty("webdriver.chrome.driver", "C:\\CrawlingProject\\driver\\chromedriver.exe");
         ChromeOptions options = new ChromeOptions();
         // options.addArguments("--headless");  // 창을 열지 않음
         WebDriver driver = new ChromeDriver(options);

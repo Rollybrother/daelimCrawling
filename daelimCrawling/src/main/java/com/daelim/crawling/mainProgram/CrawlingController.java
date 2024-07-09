@@ -64,6 +64,7 @@ public class CrawlingController {
                                 Model model) throws MessagingException, IOException {
     							
         ArrayList<DaelimVO> list = new ArrayList<>();
+        
         for (int i = 0; i < indices.size(); i++) {
             DaelimVO item = new DaelimVO(indices.get(i), names.get(i), prices.get(i), searchLimits.get(i));
             if(i<competitor1Products.size()) {

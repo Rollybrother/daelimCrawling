@@ -202,8 +202,8 @@ function addRow() {
                             <td><input type="checkbox" class="rowCheckbox"></td>
                             <td class="clickable">${response.index}</td>
                             <td class="clickable product-name">${response.name}</td>
-                            <td class="clickable">${formattedPrice}</td>
-                            <td class="clickable">${formattedSearchLimit}</td>
+                            <td class="clickable"><span class="price" data-price="${response.price}">${formattedPrice}</span></td>
+                            <td class="clickable"><span class="searchLimit" data-limit="${response.searchLimit}">${formattedSearchLimit}</span></td>
                             <td class="clickable competitor-column">${response.competitor1Product}</td>
                             <td class="clickable competitor-column">${response.competitor1Name}</td>
                             <td class="clickable competitor-column">${response.competitor2Product}</td>
@@ -229,6 +229,7 @@ function addRow() {
         }
     }
 }
+
 
 // 테이블 행 수 체크하여 스크롤 추가하는 함수
 function checkTableRows() {
@@ -276,7 +277,6 @@ function deleteRow() {
 
 function searchChecked() {
     console.log("searchChecked called");
-    
     
     const checkedRows = $('input.rowCheckbox:checked');
     const selectedItems = Array.from(checkedRows).map(row => {
@@ -329,6 +329,7 @@ function searchChecked() {
     $('body').append(form);
     form.submit();
 }
+
 
 // 점이 증가하는 애니메이션
 let loadingInterval;

@@ -22,4 +22,5 @@ public class CrawlingHistoryController {
     public ArrayList<CrawlingHistoryVO> searchByDate(@RequestParam(name = "date") String date) {
         return crawlingHistoryService.searchByDate(date);
     }
+    
 }

@@ -89,12 +89,17 @@
 </head>
 <body>
 <div th:fragment="content" class="container mt-4">
-    <div class="logo mb-4">
+    <!--<div class="logo mb-4">
+        <a href="http://192.168.1.27:8070/crawling/beforeSearch">
+            <h2>제품가격 모니터링 시스템</h2>
+        </a> 
+    </div>-->
+	<div class="logo mb-4">
         <a href="http://localhost:8070/crawling/beforeSearch">
             <h2>제품가격 모니터링 시스템</h2>
         </a> 
     </div>
-    
+	
     <form id="mainForm" action="/crawling/afterSearch" method="get" class="mb-4">
         <div class="form-check form-check-inline">
             <input type="radio" id="allSearch" name="searchType" value="all" class="form-check-input">
@@ -168,14 +173,14 @@
 
         <div class="form-check form-switch mt-3">
             <input class="form-check-input" type="checkbox" id="autoSearchToggle">
-            <label class="form-check-label" for="autoSearchToggle">실시간 자동감시 활성화</label>
+            <label class="form-check-label" for="autoSearchToggle">자동 재검색 활성화</label>
             <div class="help-icon" id="helpIcon"><i class="fas fa-question-circle"></i></div>
             <div class="help-tooltip" id="helpTooltip">자동감시는 먼저 기간을 설정하고 활성화를 해야 합니다. 
 			활성화 이후에 기간설정을 바꾸면 그 부분이 반영되지 않으니 비활성화 후 기간변경을 하고 다시 활성화 해주세요. 
 			자동감시는 주기에 따라 아침 10시에 선택항목에 대해서 실행됩니다.</div>
         </div>
         <div class="mt-2">
-            <label for="autoSearchInterval" class="form-label">자동감시 주기:</label>
+            <label for="autoSearchInterval" class="form-label">자동검색 주기:</label>
 			<span id="autoSearchStatus" class="text-primary ms-3"></span> 
             <select id="autoSearchInterval" class="form-select w-auto">
                 <option value="1">하루</option>
