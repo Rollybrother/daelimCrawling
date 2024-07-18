@@ -81,20 +81,17 @@
             border-style: solid;
             border-color: transparent #333 transparent transparent;
         }
+        .editable {
+            border: 1px dashed #000;
+            padding: 4px;
+        }
     </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        
-    </script>
+    <script src="path/to/script2.js"></script>
 </head>
 <body>
 <div th:fragment="content" class="container mt-4">
-    <!--<div class="logo mb-4">
-        <a href="http://192.168.1.27:8070/crawling/beforeSearch">
-            <h2>제품가격 모니터링 시스템</h2>
-        </a> 
-    </div>-->
-	<div class="logo mb-4">
+    <div class="logo mb-4">
         <a href="http://localhost:8070/crawling/beforeSearch">
             <h2>제품가격 모니터링 시스템</h2>
         </a> 
@@ -114,14 +111,17 @@
             <label for="coupangSearch" class="form-check-label">쿠팡</label>
         </div>
       
-        <div class="mb-3 mt-3">
-            <label for="productCode" class="form-label">쇼핑몰 검색어 입력:</label>
-            <input type="text" id="productCode" name="productCode" class="form-control" placeholder="모든 검색어 자유검색 기능입니다">
+        <div class="mb-3 mt-3 d-flex align-items-center">
+            <label for="productCode" class="form-label me-2">쇼핑몰 검색어 입력:</label>
+            <button type="submit" class="btn btn-primary me-2">검색</button>
+            <button type="button" class="btn btn-secondary" onclick="clearInput()">지우기</button>
         </div>
-        <button type="submit" class="btn btn-primary">검색</button>
-        <button type="button" class="btn btn-secondary" onclick="clearInput()">지우기</button>
+		<div class="mb-3 mt-3 d-flex align-items-center">
+			<input type="text" id="productCode" name="productCode" class="form-control me-2" placeholder="모든 검색어 자유검색 기능입니다" style="flex: 1;">
+        </div>
     </form>     
-
+	
+	
     <!-- 검색어 입력 및 검색 버튼 추가 -->
     <div class="mb-3 mt-3">
         <input type="text" id="searchKeyword" class="form-control d-inline-block w-auto" placeholder="등록된 제품명 검색">
@@ -149,11 +149,11 @@
                         <td><input type="checkbox" class="rowCheckbox"></td>
                         <td class="clickable" th:data-slipno="${item.index}" th:data-acdate="${item.index}" th:text="${item.index}">구분</td>
                         <td class="clickable product-name" th:data-slipno="${item.name}" th:data-acdate="${item.name}" th:text="${item.name}">검색대상 제품</td>
-                        <td class="clickable" th:data-slipno="${item.price}" th:data-acdate="${item.price}">
-                            <span class="price" th:data-price="${item.price}" th:text="${item.price}"></span> 원
+                        <td class="clickable price-column" th:data-slipno="${item.price}" th:data-acdate="${item.price}">
+                            <span class="price" th:data-price="${item.price}" th:text="${#numbers.formatInteger(item.price, 0, 'COMMA')}"></span> 원
                         </td>
-                        <td class="clickable" th:data-slipno="${item.searchLimit}" th:data-acdate="${item.searchLimit}">
-                            <span class="searchLimit" th:data-limit="${item.searchLimit}" th:text="${item.searchLimit}"></span> 원
+                        <td class="clickable search-limit-column" th:data-slipno="${item.searchLimit}" th:data-acdate="${item.searchLimit}">
+                            <span class="searchLimit" th:data-limit="${item.searchLimit}" th:text="${#numbers.formatInteger(item.searchLimit, 0, 'COMMA')}"></span> 원
                         </td>
                         <td class="clickable competitor-column" th:data-slipno="${item.competitor1Product}" th:data-acdate="${item.competitor1Product}" th:text="${item.competitor1Product}">경쟁사 제품 1</td>
                         <td class="clickable competitor-column" th:data-slipno="${item.competitor1Name}" th:data-acdate="${item.competitor1Name}" th:text="${item.competitor1Name}">경쟁사1 이름</td>
@@ -168,6 +168,7 @@
         <div class="mt-3">
             <button type="button" class="btn btn-success" onclick="addRow()">데이터 추가</button>
             <button type="button" class="btn btn-danger" onclick="deleteRow()">데이터 삭제</button>
+            <button type="button" id="editButton" class="btn btn-warning" onclick="toggleEdit()">데이터 수정</button>
             <button type="button" class="btn btn-info" onclick="searchChecked()">선택항목 검색</button>
         </div>
 

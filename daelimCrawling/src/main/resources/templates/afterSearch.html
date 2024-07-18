@@ -14,33 +14,19 @@
         #searchedDataTable {
             display: none;
         }
-        
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        function formatNumberWithComma(num) {
-            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + "원";
-        }
-        
-        document.addEventListener("DOMContentLoaded", function() {
-            var priceElements = document.querySelectorAll(".price");
-            priceElements.forEach(function(element) {
-                var price = parseInt(element.getAttribute("data-price"));
-                element.textContent = formatNumberWithComma(price);
-            });
-
-            
-        });
-    </script>
+    <script src="path/to/your/script.js"></script> <!-- script.js 파일을 포함 -->
 </head>
 <body>
-<div th:fragment="content" class="container mt-4"> 
+<div th:fragment="content" class="container mt-4">
     <div class="table-wrapper fixed-table-height">
-        <table class="table table-hover" id="searchedDataTable"> 
+        <table class="table table-hover" id="searchedDataTable">
             <thead>
                 <tr>
                     <th scope="col">제품명</th>
                     <th scope="col">가격</th>
+                    <th scope="col">판매자 정보</th>
                 </tr>
             </thead>
             <tbody id="tableBody">
@@ -50,7 +36,14 @@
                     </td>
                     <td class="clickable" th:data-slipno="${item.price}" th:data-acdate="${item.price}"
                         th:classappend="${item.isOK} ? '' : 'bg-danger'">
-                        <span class="price" th:data-price="${item.price}" th:text="${item.price}"></span> 원
+                        <span class="searchedPrice" th:data-price="${item.price}" th:text="${item.price}"></span> 원
+                    </td>
+					<td>
+                        <button th:if="${item.sellerDetailDto != null}" class="btn btn-info seller-info" 
+                                th:data-sellername="${item.sellerDetailDto.sellerName}"
+                                th:data-selleraddress="${item.sellerDetailDto.sellerAddress}"
+                                th:data-sellerphone="${item.sellerDetailDto.sellerPhoneNumber}"
+                                onclick="showSellerDetail(this)">판매자 정보</button>
                     </td>
                 </tr>
             </tbody>

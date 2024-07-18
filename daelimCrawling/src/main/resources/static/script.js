@@ -133,10 +133,50 @@ function updatePagination() {
     `;
 }
 
-// 초기 로딩 시 첫 페이지 표시
 document.addEventListener('DOMContentLoaded', function() {
     displayRows();
+    // 판매자 정보 관련 자바스크립트
+    var priceElements = document.querySelectorAll(".price");
+    priceElements.forEach(function(element) {
+        var price = parseInt(element.getAttribute("data-price"));
+        element.textContent = formatNumberWithComma(price);
+    });
+
+    // 판매자 정보 버튼 클릭 이벤트 리스너 추가
+    var sellerInfoButtons = document.querySelectorAll(".seller-info");
+    sellerInfoButtons.forEach(function(button) {
+        button.addEventListener('click', function() {
+            showSellerDetail(button);
+        });
+    });
 });
+
+function formatNumberWithComma(num) {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + "원";
+}
+
+function showSellerDetail(button) {
+	
+    var sellerName = button.getAttribute("data-sellername");
+    var sellerAddress = button.getAttribute("data-selleraddress");
+    var sellerPhoneNumber = button.getAttribute("data-sellerphone");
+
+    // HTML 요소가 존재하는지 확인
+    var sellerNameElement = document.getElementById("sellerName");
+    var sellerAddressElement = document.getElementById("sellerAddress");
+    var sellerPhoneNumberElement = document.getElementById("sellerPhoneNumber");
+
+    if (sellerNameElement && sellerAddressElement && sellerPhoneNumberElement) {
+        sellerNameElement.textContent = "판매자 이름: " + sellerName;
+        sellerAddressElement.textContent = "판매자 주소: " + sellerAddress;
+        sellerPhoneNumberElement.textContent = "판매자 연락처: " + sellerPhoneNumber;
+
+        var sellerDetailModal = new bootstrap.Modal(document.getElementById("sellerDetailModal"));
+        sellerDetailModal.show();
+    } else {
+        console.error("판매자 정보 요소를 찾을 수 없습니다.");
+    }
+}
 
 
 // 페이징 구현종료
@@ -151,7 +191,7 @@ function selectAllCheckboxes(source) {
     $('.rowCheckbox').prop('checked', source.checked);
 }
 
-// 데이터 추가 함수
+//데이터 추가 함수
 function addRow() {
     console.log("addRow called");
     const modal = new bootstrap.Modal(document.getElementById('productModal'), {
@@ -162,17 +202,15 @@ function addRow() {
 
     const confirmAdd = document.getElementById("confirmAdd");
 
-    // 사용자가 확인 버튼을 클릭하면 입력값을 처리
     confirmAdd.onclick = function() {
-        const productName = document.getElementById("productName").value;
-        const productPrice = document.getElementById("productPrice").value;
-        const searchLimit = document.getElementById("searchLimit").value;
+        const productName = document.getElementById("productName").value.trim();
+        let productPrice = document.getElementById("productPrice").value.replace(/,/g, '');
+        let searchLimit = document.getElementById("searchLimit").value.replace(/,/g, '');
         const competitor1Product = document.getElementById("competitor1Product").value;
         const competitor1Name = document.getElementById("competitor1Name").value;
         const competitor2Product = document.getElementById("competitor2Product").value;
         const competitor2Name = document.getElementById("competitor2Name").value;
 
-        // 가격과 검색 한도가 숫자인지 확인
         if (isNaN(productPrice) || isNaN(searchLimit)) {
             alert("가격이나 검색 범위는 숫자를 입력해야 합니다.");
             return;
@@ -193,17 +231,16 @@ function addRow() {
                     competitor2Name: competitor2Name 
                 }),
                 success: function(response) {
-                    // 가격과 검색 한도를 형식화
-                    const formattedPrice = response.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " 원";
-                    const formattedSearchLimit = response.searchLimit.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " 원";
+                    const formattedPrice = response.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                    const formattedSearchLimit = response.searchLimit.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
                     const newRow = `
                         <tr>
                             <td><input type="checkbox" class="rowCheckbox"></td>
                             <td class="clickable">${response.index}</td>
                             <td class="clickable product-name">${response.name}</td>
-                            <td class="clickable"><span class="price" data-price="${response.price}">${formattedPrice}</span></td>
-                            <td class="clickable"><span class="searchLimit" data-limit="${response.searchLimit}">${formattedSearchLimit}</span></td>
+                            <td class="clickable price-column"><span class="price" data-price="${response.price}">${formattedPrice}</span> 원</td>
+                            <td class="clickable search-limit-column"><span class="searchLimit" data-limit="${response.searchLimit}">${formattedSearchLimit}</span> 원</td>
                             <td class="clickable competitor-column">${response.competitor1Product}</td>
                             <td class="clickable competitor-column">${response.competitor1Name}</td>
                             <td class="clickable competitor-column">${response.competitor2Product}</td>
@@ -212,12 +249,9 @@ function addRow() {
                     `;
                     $('#dataTable tbody').append(newRow);
 
-                    // 전체 데이터 배열도 업데이트
                     allRows = $('#dataTable tbody tr').clone();
 
-                    modal.hide(); // 성공적으로 추가된 후 모달 닫기
-
-                    // 행 수 체크하여 스크롤 추가
+                    modal.hide();
                     checkTableRows();
                 },
                 error: function(error) {
@@ -229,6 +263,7 @@ function addRow() {
         }
     }
 }
+
 
 
 // 테이블 행 수 체크하여 스크롤 추가하는 함수
@@ -284,24 +319,27 @@ function searchChecked() {
         return {
             index: cells.eq(1).text(),
             name: cells.eq(2).text(),
-            price: cells.eq(3).find('.price').data('price'),
-            searchLimit: cells.eq(4).find('.searchLimit').data('limit'),
+            price: parseInt(cells.eq(3).find('.price').text().replace(/,/g, '').replace(/원/g, '').trim()),
+            searchLimit: parseInt(cells.eq(4).find('.searchLimit').text().replace(/,/g, '').replace(/원/g, '').trim()),
             competitor1Product: cells.eq(5).text(),
             competitor1Name: cells.eq(6).text(),
             competitor2Product: cells.eq(7).text(),
             competitor2Name: cells.eq(8).text()
         };
     });
-    
-  // 선택된 항목이 없을 경우 알림 표시
+
+    // 선택된 항목이 없을 경우 알림 표시
     if (selectedItems.length === 0) {
         alert("선택된 항목이 없습니다.");
         return;
     }
-	// 팝업 표시
-    $('#loadingPopup').modal('show');
-    const searchType = $('input[name="searchType"]:checked').val();
 
+    // sellerDetailModal 모달 창 숨기기
+    $('#sellerDetailModal').modal('hide');
+    // loadingPopup 모달 창 표시
+    $('#loadingPopup').modal('show');
+
+    const searchType = $('input[name="searchType"]:checked').val();
     const autoSearchEnabled = typeof isAutoSearchEnabled !== 'undefined' ? isAutoSearchEnabled : false;
     let autoSearchInterval = typeof intervalDays !== 'undefined' ? intervalDays : 1;
 
@@ -517,10 +555,11 @@ function searchPast() {
             tableBody.empty();
 
             response.forEach(function(item) {
+                var formattedPrice = Number(item.price).toLocaleString() + "원";
                 var row = `<tr>
                     <td>${item.date}</td>
                     <td>${item.name}</td>
-                    <td>${item.price}</td>
+                    <td>${formattedPrice}</td>
                     <td><a href="${item.link}" target="_blank">링크</a></td>
                 </tr>`;
                 tableBody.append(row);
@@ -638,6 +677,24 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
 $(document).ready(function() {
+	
+ 	// 모달 닫기 버튼에 이벤트 리스너 추가
+    $('#closeModalButton').on('click', function () {
+        $('#sellerDetailModal').modal('hide');
+        $('.modal-backdrop').remove();
+    });
+
+    $('#closeModalButtonFooter').on('click', function () {
+        $('#sellerDetailModal').modal('hide');
+        $('.modal-backdrop').remove();
+    });
+
+    // 모달이 닫힐 때 백드롭을 제거하는 이벤트 추가
+    $('#sellerDetailModal').on('hidden.bs.modal', function () {
+        $('.modal-backdrop').remove();
+    });
+	
+	$('#sellerDetailModal').modal('hide'); // 페이지 로드 시 모달을 숨깁니다.
 	// 테이블 전체보기 기능
 	originalRows = $('#dataTable tbody tr').clone();
 	checkTableRows();
@@ -678,9 +735,6 @@ $(document).ready(function() {
     var intervalDays = window.thymeleafData.autoSearchInterval;
     var searchType = window.thymeleafData.searchType;
     var selectedIndices = window.thymeleafData.indices;
-    /* 차트를 안쓰게 되어서 주석처리
-    var percentArray = window.thymeleafData.percentArray;
-    var competitorResult = window.thymeleafData.competitorResult;*/
 
     // 검색 타입 설정
     if (searchType === 'all') {
@@ -731,73 +785,5 @@ $(document).ready(function() {
     $('#sortAscButton').click(sortAsc);
     $('#sortDescButton').click(sortDesc);
     $('#searchButton').click(applySearchFilter);
-
-    // Chart.js를 사용하여 막대 그래프 생성, 차트 제거됨
-    /*if (percentArray && percentArray.length > 0) {
-        var labels = percentArray.map(item => item.shoppingMall);
-        var data = percentArray.map(item => item.percent);
-
-        var ctx = document.getElementById('percentChart').getContext('2d');
-        var percentChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: '위반 비율 (%)',
-                    data: data,
-                    backgroundColor: 'rgba(34, 139, 34, 0.7)', // 짙은 초록색
-                    borderColor: 'rgba(34, 139, 34, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 100
-                    },
-                    x: {
-                        ticks: {
-                            color: 'black', // 선명한 검정색
-                            font: {
-                                weight: 'bold' // 굵은 글씨
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    } else {
-        console.log("No data available for chart.");
-    }
-
-    if (competitorResult && competitorResult.length > 0) {
-        var labels = competitorResult.map(item => item.productName + ', ' + item.shoppingMall);
-        var data = competitorResult.map(item => item.averagePrice);
-
-        var ctx = document.getElementById('competitorChart').getContext('2d');
-        var competitorChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: '경쟁사 제품 사이트별 평균 가격',
-                    data: data,
-                    backgroundColor: 'rgba(70, 130, 180, 0.7)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    } else {
-        console.log("No data available for competitor chart.");
-    }*/
 });
 

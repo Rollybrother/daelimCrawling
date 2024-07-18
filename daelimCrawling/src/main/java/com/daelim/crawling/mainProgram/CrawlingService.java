@@ -65,7 +65,6 @@ public class CrawlingService {
     }
 	
 	
-	
 	public ArrayList<CrawlingDto> search(String productCode,String searchType) {
 		ArrayList<CrawlingDto> temp = new ArrayList<>();
 		if(searchType.equals("all")) {
@@ -77,18 +76,7 @@ public class CrawlingService {
 		}else if(searchType.equals("coupang")) {
 			temp.addAll(searchCoupang(productCode));
 		}
-//		ArrayList<CrawlingDto> result = new ArrayList<>();
-//		for(CrawlingDto e : temp) {
-//			if(isValid(e,productCode)) {
-//				LocalDate today = LocalDate.now();
-//		        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
-//		        String formattedDate = today.format(formatter);
-//				e.setDate(formattedDate);
-//				result.add(e);
-//			}
-//		} 
-//		crawlingHistoryService.insert(result);
-		// 자유검색을 위해 유효성 함수 해제
+
 		return temp;
 	}
 	

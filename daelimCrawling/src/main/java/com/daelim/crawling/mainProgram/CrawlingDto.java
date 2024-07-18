@@ -1,6 +1,7 @@
 package com.daelim.crawling.mainProgram;
 
-import jakarta.persistence.Entity;
+import com.daelim.crawling.mainProgram.sellerDetail.SellerDetailDto;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,6 +14,7 @@ public class CrawlingDto {
 	private boolean isOK = true;
 	private String searchFrom;
 	private String date;
+	public SellerDetailDto sellerDetailDto;
 	
 	CrawlingDto(){
 		
@@ -22,5 +24,13 @@ public class CrawlingDto {
 		this.price = price;
 		this.link = link;
 		this.searchFrom = searchFrom;
+	}
+	
+	public CrawlingDto(String name,int price,String link,String searchFrom,SellerDetailDto sellerDetailDto){
+		this.name = name;
+		this.price = price;
+		this.link = link;
+		this.searchFrom = searchFrom;
+		this.sellerDetailDto = sellerDetailDto;
 	}
 }

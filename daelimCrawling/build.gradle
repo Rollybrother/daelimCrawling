@@ -72,6 +72,11 @@ dependencies {
     // 백엔드를 통한 차트 생성 라이브러리
     implementation 'org.jfree:jfreechart:1.5.3'
     implementation 'commons-io:commons-io:2.8.0'
+    
+    //엑셀 관련 라이브러리
+    // Apache POI 라이브러리 추가
+    implementation 'org.apache.poi:poi-ooxml:5.2.3'
+    implementation 'org.apache.poi:poi:5.2.3'
 }
 
 tasks.named('test') {
