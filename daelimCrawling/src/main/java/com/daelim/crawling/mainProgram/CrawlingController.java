@@ -128,6 +128,7 @@ public class CrawlingController {
         ArrayList<CompetitorDto> competitorResult = competitorService.finalComputation();
         
         ArrayList<CrawlingDto> searchFinalResult = new ArrayList<>();
+        HashSet<CrawlingDto> tempSet = new HashSet();
         
         for (DaelimVO e : list) {
             int limitPrice = e.getPrice();
@@ -154,11 +155,14 @@ public class CrawlingController {
                     	SellerDetailDto temp = sellerDetailService.searchSellerCoupang(e2.getLink());
                     	e2.setSellerDetailDto(temp);
                     }
-                    searchFinalResult.add(e2);
+                    tempSet.add(e2);
                 } else {
-                    searchFinalResult.add(e2);
+                	tempSet.add(e2);
                 }
             }
+        }
+        for(CrawlingDto e : tempSet) {
+        	searchFinalResult.add(e);
         }
         ArrayList<DaelimVO> originalList = this.daelimRepository.findAllFromDbCrawling();
         ArrayList<percentDto> percentArray = analizePercent(searchFinalResult);

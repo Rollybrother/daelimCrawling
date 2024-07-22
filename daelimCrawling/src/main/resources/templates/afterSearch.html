@@ -14,6 +14,14 @@
         #searchedDataTable {
             display: none;
         }
+        .form-inline .form-group {
+            display: flex;
+            align-items: center;
+        }
+        .form-inline .form-group input[type="text"] {
+            width: auto;
+            margin-right: 0.5rem;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="path/to/your/script.js"></script> <!-- script.js 파일을 포함 -->
@@ -89,55 +97,76 @@
     <!-- 구분선을 위한 div 추가 -->
     <div class="divider"></div>
 
-    <!-- 결과분석 제목 추가 -->
+    <!-- 결과분석 제목 및 결과보기 버튼 추가 -->
     <h2 class="mt-4">결과분석</h2>
-    
-    <div class="row mt-4">
-        <div class="col-md-6">
-            <div class="table-wrapper fixed-table-height">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th scope="col">쇼핑몰 이름</th>
-                            <th scope="col">위반 비율</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="item : ${percentArray}">
-                            <td th:text="${item.shoppingMall}">쇼핑몰 이름</td>
-                            <td>
-                                <span th:text="${item.percent} + '% (' + ${item.denominator} + '건 중 ' + ${item.numerator} + '건)'">
-                                    위반 비율
-                                </span>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="table-wrapper fixed-table-height">
-                <table class="table table-hover" id="competitorTable">
-                    <thead>
-                        <tr>
-                            <th scope="col">(경쟁제품, 쇼핑몰)</th>
-                            <th scope="col">평균가격</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="item : ${competitorResult}">
-                            <td th:text="${item.productName + ', ' + item.shoppingMall}">(제품명, 쇼핑몰)</td>
-                            <td>
-                                <span class="price" th:data-price="${item.averagePrice}+'원'"></span>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="mt-3">
-                <input type="text" id="searchCompetitorBox" class="form-control d-inline-block w-auto" placeholder="경쟁제품 검색">
-                <button id="searchCompetitorButton" class="btn btn-primary ms-2">검색</button> 
-                <button id="showAllButton" class="btn btn-secondary ms-2">전체보기</button> 
+    <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#resultModal">결과보기</button>
+
+</div>
+
+<!-- 결과분석 모달 fragment 정의 -->
+<div th:fragment="resultModal">
+    <div class="modal fade" id="resultModal" tabindex="-1" aria-labelledby="resultModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="resultModalLabel">결과분석</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="table-wrapper fixed-table-height">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">쇼핑몰 이름</th>
+                                            <th scope="col">위반 비율</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="item : ${percentArray}">
+                                            <td th:text="${item.shoppingMall}">쇼핑몰 이름</td>
+                                            <td>
+                                                <span th:text="${item.percent} + '% (' + ${item.denominator} + '건 중 ' + ${item.numerator} + '건)'">
+                                                    위반 비율
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="table-wrapper fixed-table-height">
+                                <table class="table table-hover" id="competitorTable">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">(경쟁제품, 쇼핑몰)</th>
+                                            <th scope="col">평균가격</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="item : ${competitorResult}">
+                                            <td th:text="${item.productName + ', ' + item.shoppingMall}">(제품명, 쇼핑몰)</td>
+                                            <td>
+                                                <span class="price" th:data-price="${item.averagePrice}+'원'"></span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="mt-3">
+                                <form class="form-inline">
+                                    <div class="form-group">
+                                        <input type="text" id="searchCompetitorBox" class="form-control" placeholder="경쟁제품 검색" style="width: 150px;">
+                                        <button id="searchCompetitorButton" class="btn btn-primary ms-2">검색</button> 
+                                        <button id="showAllButton" class="btn btn-secondary ms-2">전체보기</button> 
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

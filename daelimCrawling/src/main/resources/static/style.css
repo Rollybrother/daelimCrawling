@@ -88,6 +88,10 @@ th {
     height: 180px; 
 }
 
+#dataTable th, #dataTable td {
+    text-align: center;
+}
+
 /* 검색결과테이블 관련 설정 */
 #searchedDataTable th, 
 #searchedDataTable td {
