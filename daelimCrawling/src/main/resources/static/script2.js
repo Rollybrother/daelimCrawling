@@ -75,7 +75,6 @@ function saveEdits() {
             // 필요한 경우 화면 갱신 등의 후속 작업 수행
         },
         error: function (xhr, status, error) {
-            alert("수정에 실패했습니다.");
         }
     });
 }
@@ -117,6 +116,7 @@ $(document).ready(function() {
 
     // 페이지 로드 시 초기 상태 설정
     setAutocompleteSource("");
+    
 });
 
 //제품등록 시 3자리마다 콤마 표시
@@ -139,3 +139,77 @@ document.addEventListener('DOMContentLoaded', function() {
     productPriceInput.addEventListener('keyup', handleInput);
     searchLimitInput.addEventListener('keyup', handleInput);
 });
+
+// 마이페이지 관련 설정
+document.addEventListener("DOMContentLoaded", function() {
+	
+	
+    const editUserIdButton = document.getElementById('editUserIdButton');
+    const userIdInput = document.getElementById('userId');
+    const editPasswordButton = document.getElementById('editPasswordButton');
+    const passwordInput = document.getElementById('password');
+    const logoutButton = document.getElementById('logoutButton');
+
+    editUserIdButton.addEventListener('click', function() {
+        if (editUserIdButton.textContent === '아이디 변경') {
+            userIdInput.removeAttribute('readonly');
+            editUserIdButton.textContent = '변경완료';
+        } else {
+            const newUserId = userIdInput.value;
+            if (validateEmail(newUserId)) {
+                userIdInput.setAttribute('readonly', 'readonly');
+                editUserIdButton.textContent = '아이디 변경';
+                // AJAX 요청으로 아이디 변경 로직 추가
+                updateUserDetails({ userId: newUserId });
+            } else {
+                alert('유효한 이메일 형식의 아이디를 입력하세요.');
+            }
+        }
+    });
+
+    editPasswordButton.addEventListener('click', function() {
+        if (editPasswordButton.textContent === '비밀번호 변경') {
+            passwordInput.removeAttribute('readonly');
+            editPasswordButton.textContent = '변경완료';
+        } else {
+            const newPassword = passwordInput.value;
+            passwordInput.setAttribute('readonly', 'readonly');
+            editPasswordButton.textContent = '비밀번호 변경';
+            // AJAX 요청으로 비밀번호 변경 로직 추가
+            updateUserDetails({ password: newPassword });
+        }
+    });
+
+    logoutButton.addEventListener('click', function() {
+        // 로그아웃 로직 추가
+        window.location.href = '/logout';
+    });
+
+    function validateEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+    }
+
+    function updateUserDetails(details) {
+        fetch('/updateUser', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(details),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('변경이 완료되었습니다.');
+            } else {
+            }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+    }
+});
+
+
+

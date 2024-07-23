@@ -16,6 +16,9 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -77,6 +80,14 @@ public class CrawlingController {
         
         ArrayList<CrawlingDto> result = new ArrayList<>();  // 기본적으로 빈 리스트를 사용하거나 필요 시 기본 데이터를 추가
         model.addAttribute("listAfter", result); 
+        
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            model.addAttribute("username", userDetails.getUsername());
+            model.addAttribute("password", "********"); // 실제 비밀번호는 전달하지 않음
+        }
+        
         return "splitView";
     }
     
@@ -170,7 +181,8 @@ public class CrawlingController {
         searchFinalResult.sort(Comparator.comparingInt(CrawlingDto::getPrice));
         
         // 이메일 발송
-        sendEmail(searchFinalResult, percentArray,competitorResult);
+        String userEmail = getCurrentUserEmail();
+        sendEmail(searchFinalResult, percentArray,competitorResult, userEmail);
         
         model.addAttribute("list", originalList);
         model.addAttribute("listAfter", searchFinalResult);
@@ -209,9 +221,18 @@ public class CrawlingController {
         return "splitView"; 
     }
     
+    // 로그인한 사용자의 이메일을 가져오는 메서드
+    private String getCurrentUserEmail() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            return userDetails.getUsername(); // 이메일을 아이디로 사용 중
+        }
+        return null;
+    }
     
     private void sendEmail(ArrayList<CrawlingDto> target, ArrayList<percentDto> percentArray, 
-            ArrayList<CompetitorDto> competitorArray) throws MessagingException, IOException {
+            ArrayList<CompetitorDto> competitorArray, String userEmail) throws MessagingException, IOException {
 
     ArrayList<CrawlingDto> sendMail = new ArrayList<>();
     for (CrawlingDto e : target) {
@@ -270,7 +291,7 @@ public class CrawlingController {
         helper.setFrom("jinsoo4735@naver.com"); // 네이버 smtp의 경우 보내는 사람의 이메일을 적어주어야 함
 
         // 이메일 설정
-        helper.setTo("jsmoon@dltc.co.kr");
+        helper.setTo(userEmail); // 로그인한 사용자의 이메일을 수신자로 설정
         helper.setSubject("최저가 한도 초과 제품 발생");
 
         // 이메일 본문 설정
