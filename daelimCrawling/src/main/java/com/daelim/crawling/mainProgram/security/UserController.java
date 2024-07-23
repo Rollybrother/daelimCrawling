@@ -1,6 +1,9 @@
 package com.daelim.crawling.mainProgram.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -35,7 +38,7 @@ public class UserController {
     public String loginForm() {
         return "login";
     }
-    
+
     @GetMapping("/check-username")
     @ResponseBody
     public String checkUsername(@RequestParam("id") String id) {
@@ -45,5 +48,33 @@ public class UserController {
         } else {
             return "사용 가능한 아이디입니다";
         }
+    }
+
+    @GetMapping("/save-settings")
+    @ResponseBody
+    public String saveUserSettings(@RequestParam("searchType") String searchType,
+                                   @RequestParam("selectedItems") String selectedItems) {
+        if (searchType != null && !searchType.isEmpty() && selectedItems != null && !selectedItems.isEmpty()) {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
+                UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+                String username = userDetails.getUsername();
+                userService.updateUserSettings(username, searchType, selectedItems);
+                return "Settings saved successfully";
+            }
+        }
+        return "No settings to save";
+    }
+
+    @GetMapping("/get-settings")
+    @ResponseBody
+    public UserVO getUserSettings(@RequestParam("username") String username) {
+        return userService.getUserSettings(username);
+    }
+
+    @GetMapping("/get-role")
+    @ResponseBody
+    public UserVO getUserRole(@RequestParam("id") String id) {
+        return userService.getUserRole(id);
     }
 }

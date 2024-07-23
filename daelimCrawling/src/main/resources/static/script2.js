@@ -80,44 +80,6 @@ function saveEdits() {
 }
 
 
-$(document).ready(function() {
-    // 비데 리스트와 수전 리스트를 서버에서 받아온다.
-    var bidetList = window.thymeleafData.bidetList.map(item => item.name);
-    var faucetList = window.thymeleafData.faucetList.map(item => item.name);
-
-    // jQuery UI Autocomplete 적용 함수
-    function setAutocompleteSource(category) {
-        if (category === "비데") {
-            $("#productName").autocomplete({
-                source: bidetList,
-                minLength: 1,
-                appendTo: "#productModal .modal-body"
-            });
-        } else if (category === "수전") {
-            $("#productName").autocomplete({
-                source: faucetList,
-                minLength: 1,
-                appendTo: "#productModal .modal-body"
-            });
-        } else {
-            $("#productName").autocomplete({
-                source: [],
-                minLength: 1,
-                appendTo: "#productModal .modal-body"
-            });
-        }
-    }
-
-    // 카테고리 선택 변경 이벤트
-    $("#categorySelect").change(function() {
-        var selectedCategory = $(this).val();
-        setAutocompleteSource(selectedCategory);
-    });
-
-    // 페이지 로드 시 초기 상태 설정
-    setAutocompleteSource("");
-    
-});
 
 //제품등록 시 3자리마다 콤마 표시
 document.addEventListener('DOMContentLoaded', function() {
@@ -181,9 +143,31 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     logoutButton.addEventListener('click', function() {
-        // 로그아웃 로직 추가
-        window.location.href = '/logout';
-    });
+	    var searchType = document.querySelector('input[name="searchType"]:checked') ? document.querySelector('input[name="searchType"]:checked').value : "";
+	    var selectedItems = [];
+	    
+	    document.querySelectorAll('.rowCheckbox:checked').forEach(function(checkbox) {
+	        selectedItems.push(checkbox.closest('tr').querySelector('.product-name').textContent.trim());
+	    });
+	
+	    // 빈 selectedItems라도 서버로 전송
+	    $.ajax({
+	        url: '/save-settings',
+	        type: 'GET',
+	        data: {
+	            searchType: searchType,
+	            selectedItems: JSON.stringify(selectedItems)
+	        },
+	        success: function(response) {
+	            window.location.href = '/logout';
+	        },
+	        error: function(error) {
+	            console.error('Error saving settings:', error);
+	            window.location.href = '/logout'; // 에러가 발생해도 로그아웃 진행
+	        }
+	    });
+	});
+
 
     function validateEmail(email) {
         const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -212,4 +196,73 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 
+$(document).ready(function() {
+    // 비데 리스트와 수전 리스트를 서버에서 받아온다.
+    var bidetList = window.thymeleafData.bidetList.map(item => item.name);
+    var faucetList = window.thymeleafData.faucetList.map(item => item.name);
+
+    // jQuery UI Autocomplete 적용 함수
+    function setAutocompleteSource(category) {
+        if (category === "비데") {
+            $("#productName").autocomplete({
+                source: bidetList,
+                minLength: 1,
+                appendTo: "#productModal .modal-body"
+            });
+        } else if (category === "수전") {
+            $("#productName").autocomplete({
+                source: faucetList,
+                minLength: 1,
+                appendTo: "#productModal .modal-body"
+            });
+        } else {
+            $("#productName").autocomplete({
+                source: [],
+                minLength: 1,
+                appendTo: "#productModal .modal-body"
+            });
+        }
+    }
+
+    // 카테고리 선택 변경 이벤트
+    $("#categorySelect").change(function() {
+        var selectedCategory = $(this).val();
+        setAutocompleteSource(selectedCategory);
+    });
+
+    // 페이지 로드 시 초기 상태 설정
+    setAutocompleteSource("");
+    
+     // 사용자 설정 로드
+    var username = /*[[${username}]]*/ '';
+
+    $.ajax({
+        url: '/get-settings',
+        type: 'GET',
+        data: { username: username },
+        success: function(response) {
+            if (response) {
+                var settings = response;
+                if (settings.searchType) {
+                    $('input[name="searchType"][value="' + settings.searchType + '"]').prop('checked', true);
+                }
+                
+                if (settings.selectedItems) {
+                    var selectedItems = JSON.parse(settings.selectedItems);
+                    selectedItems.forEach(function(item) {
+                        $('#dataTable tbody tr').each(function() {
+                            if ($(this).find('.product-name').text().trim() === item) {
+                                $(this).find('.rowCheckbox').prop('checked', true);
+                            }
+                        });
+                    });
+                }
+            }
+        },
+        error: function(error) {
+            console.error('Error loading settings:', error);
+        }
+    });
+    
+});
 

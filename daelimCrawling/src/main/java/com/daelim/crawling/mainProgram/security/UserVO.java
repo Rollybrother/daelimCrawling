@@ -17,13 +17,19 @@ import lombok.Setter;
 @Data
 @NoArgsConstructor @AllArgsConstructor
 public class UserVO {
-	@Id
+    @Id
     @Column(name = "id")
-	private String id;
-	
+    private String id;
+
     @Column(name = "password")
-	private String password;
-    
+    private String password;
+
     @Column(name = "role")
-	private int role;
+    private int role;
+
+    @Column(name = "searchType", nullable = true)
+    private String searchType;
+
+    @Column(name = "selectedItems", nullable = true)
+    private String selectedItems; // JSON 형태로 저장
 }

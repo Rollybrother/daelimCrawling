@@ -9,13 +9,32 @@
             if (window.location.href.indexOf('error') > -1) {
                 alert("로그인에 실패했습니다");
             }
+
+            var currentUrl = window.location.href;
+            if (currentUrl.indexOf('localhost') === -1) {
+                $('#login-form').on('submit', function(event) {
+                    var role = $('input[name="username"]').val(); // 로그인하는 유저의 역할을 알아내기 위해 아이디를 사용
+                    $.ajax({
+                        url: '/get-role',
+                        type: 'GET',
+                        data: { id: role },
+                        async: false, // 동기 요청으로 변경
+                        success: function(response) {
+                            if (response.role === 0) {
+                                alert("관리자만 로그인이 가능한 페이지입니다");
+                                event.preventDefault();
+                            }
+                        }
+                    });
+                });
+            }
         });
     </script>
 </head>
 <body>
 <div class="container mt-5">
     <h1 class="text-center">제품가격 모니터링 시스템 로그인</h1>
-    <form th:action="@{/login}" method="post" class="needs-validation" novalidate>
+    <form id="login-form" th:action="@{/login}" method="post" class="needs-validation" novalidate>
         <div class="form-group row justify-content-center">
             <label for="username" class="col-sm-2 col-form-label text-right">아이디:</label>
             <div class="col-md-6">
