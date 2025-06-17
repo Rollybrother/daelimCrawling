@@ -107,18 +107,22 @@
     
     <form id="mainForm" action="/crawling/afterSearch" method="get" class="mb-4">
         <div class="form-check form-check-inline">
-            <input type="radio" id="allSearch" name="searchType" value="all" class="form-check-input">
+            <input type="radio" id="allSearch" name="searchType" value="all" class="form-check-input" disabled>
             <label for="allSearch" class="form-check-label">전체검색</label>
         </div>
         <div class="form-check form-check-inline">
-            <input type="radio" id="naverSearch" name="searchType" value="naver" class="form-check-input">
+			<input type="radio" id="naverSearch" name="searchType" value="naver" class="form-check-input" disabled>
             <label for="naverSearch" class="form-check-label">네이버쇼핑</label>
         </div>
         <div class="form-check form-check-inline">
-            <input type="radio" id="coupangSearch" name="searchType" value="coupang" class="form-check-input">
+            <input type="radio" id="coupangSearch" name="searchType" value="coupang" class="form-check-input"disabled>
             <label for="coupangSearch" class="form-check-label">쿠팡</label>
         </div>
-        
+		<div class="form-check form-check-inline">
+            <input type="radio" id="daumSearch" name="searchType" value="daum" class="form-check-input">
+            <label for="daumSearch" class="form-check-label">다음</label>
+        </div>
+       
         <div class="mb-3 mt-3 d-flex align-items-center">
             <label for="productCode" class="form-label me-2">쇼핑몰 검색어 입력:</label>
             <button type="submit" class="btn btn-primary me-2">검색</button>

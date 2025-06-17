@@ -149,9 +149,6 @@ public class CrawlingController {
                     // 이 지점에 판매자 정보를 넣어야 함
                     if(e2.getSearchFrom().equals("naver")) {
                     	SellerDetailDto temp = sellerDetailService.searchSellerNaver(e2.getLink());
-                    	if(e2.getName().equals("도비도스 대림방수비데 IPX-5 DLB-310 24년형 신제품 노즐자동세척(설치비 별도)")) {
-                    		System.out.println();
-                    	}
                     	if(temp!=null) {
                     		if(temp.getSellerAddress()=="" &&
                     			temp.getSellerName()=="" &&
@@ -164,6 +161,9 @@ public class CrawlingController {
                     	e2.setSellerDetailDto(temp);
                     }else if(e2.getSearchFrom().equals("coupang")) {
                     	SellerDetailDto temp = sellerDetailService.searchSellerCoupang(e2.getLink());
+                    	e2.setSellerDetailDto(temp);
+                    }else if(e2.getSearchFrom().equals("daum")) {
+                    	SellerDetailDto temp = sellerDetailService.searchSellerDaum(e2.getLink());
                     	e2.setSellerDetailDto(temp);
                     }
                     tempSet.add(e2);
@@ -202,6 +202,7 @@ public class CrawlingController {
         ArrayList<CrawlingDto> result = crawlingService.search(productCode, searchType);
         ArrayList<DaelimVO> originalList = this.daelimRepository.findAllFromDbCrawling();
         model.addAttribute("list", originalList); 
+        result.sort(Comparator.comparingInt(CrawlingDto::getPrice));
         model.addAttribute("listAfter", result); 
         
         // 비데 리스트와 수전 리스트를 전달
@@ -306,64 +307,65 @@ public class CrawlingController {
 	    }
 	}
 
-private ByteArrayOutputStream createExcelFile(ArrayList<CrawlingDto> target, ArrayList<percentDto> percentArray) throws IOException {
-    Workbook workbook = new XSSFWorkbook();
-    Sheet sheet = workbook.createSheet("위반제품 목록");
-    int rowNum = 0;
-
-    // Header row for CrawlingDto
-    Row headerRow = sheet.createRow(rowNum++);
-    headerRow.createCell(0).setCellValue("제품명");
-    headerRow.createCell(1).setCellValue("가격");
-    headerRow.createCell(2).setCellValue("링크");
-    headerRow.createCell(3).setCellValue("쇼핑몰");
-    headerRow.createCell(4).setCellValue("판매자 이름");
-    headerRow.createCell(5).setCellValue("판매자 주소");
-    headerRow.createCell(6).setCellValue("판매자 전화번호");
-
-    // Data rows for CrawlingDto
-    NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.KOREA);
-    for (CrawlingDto dto : target) {
-        Row row = sheet.createRow(rowNum++);
-        row.createCell(0).setCellValue(dto.getName());
-        row.createCell(1).setCellValue(numberFormat.format(dto.getPrice()));
-        row.createCell(2).setCellValue(dto.getLink());
-        row.createCell(3).setCellValue(dto.getSearchFrom());
-        if(dto.sellerDetailDto!=null) {
-        	row.createCell(4).setCellValue(dto.getSellerDetailDto().getSellerName());
-            row.createCell(5).setCellValue(dto.getSellerDetailDto().getSellerAddress());
-            row.createCell(6).setCellValue(dto.getSellerDetailDto().getSellerPhoneNumber());
-        }
-        
-    }
-
-    // Create a new sheet for percentArray
-    Sheet percentSheet = workbook.createSheet("검색결과 분석");
-    rowNum = 0;
-
-    // Header row for percentDto
-    Row percentHeaderRow = percentSheet.createRow(rowNum++);
-    percentHeaderRow.createCell(0).setCellValue("쇼핑몰");
-    percentHeaderRow.createCell(1).setCellValue("위반비율");
-    percentHeaderRow.createCell(2).setCellValue("전체 제품수");
-    percentHeaderRow.createCell(3).setCellValue("위반 제품수");
-
-    // Data rows for percentDto
-    for (percentDto percent : percentArray) {
-        Row row = percentSheet.createRow(rowNum++);
-        row.createCell(0).setCellValue(percent.getShoppingMall());
-        row.createCell(1).setCellValue(percent.getPercent());
-        row.createCell(2).setCellValue(percent.getDenominator());
-        row.createCell(3).setCellValue(percent.getNumerator());
-    }
-
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    workbook.write(baos);
-    workbook.close();
-
-    return baos;
-}
-
+	private ByteArrayOutputStream createExcelFile(ArrayList<CrawlingDto> target, ArrayList<percentDto> percentArray) throws IOException {
+	   
+		Workbook workbook = new XSSFWorkbook();
+	    Sheet sheet = workbook.createSheet("위반제품 목록");
+	    int rowNum = 0;
+	
+	    // Header row for CrawlingDto
+	    Row headerRow = sheet.createRow(rowNum++);
+	    headerRow.createCell(0).setCellValue("제품명");
+	    headerRow.createCell(1).setCellValue("가격");
+	    headerRow.createCell(2).setCellValue("링크");
+	    headerRow.createCell(3).setCellValue("쇼핑몰");
+	    headerRow.createCell(4).setCellValue("판매자 이름");
+	    headerRow.createCell(5).setCellValue("판매자 주소");
+	    headerRow.createCell(6).setCellValue("판매자 전화번호");
+	
+	    // Data rows for CrawlingDto
+	    NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.KOREA);
+	    for (CrawlingDto dto : target) {
+	        Row row = sheet.createRow(rowNum++);
+	        row.createCell(0).setCellValue(dto.getName());
+	        row.createCell(1).setCellValue(numberFormat.format(dto.getPrice()));
+	        row.createCell(2).setCellValue(dto.getLink());
+	        row.createCell(3).setCellValue(dto.getSearchFrom());
+	        if(dto.sellerDetailDto!=null) {
+	        	row.createCell(4).setCellValue(dto.getSellerDetailDto().getSellerName());
+	            row.createCell(5).setCellValue(dto.getSellerDetailDto().getSellerAddress());
+	            row.createCell(6).setCellValue(dto.getSellerDetailDto().getSellerPhoneNumber());
+	        }
+	        
+	    }
+	
+	    // Create a new sheet for percentArray
+	    Sheet percentSheet = workbook.createSheet("검색결과 분석");
+	    rowNum = 0;
+	    
+	    // Header row for percentDto
+	    Row percentHeaderRow = percentSheet.createRow(rowNum++);
+	    percentHeaderRow.createCell(0).setCellValue("쇼핑몰");
+	    percentHeaderRow.createCell(1).setCellValue("위반비율");
+	    percentHeaderRow.createCell(2).setCellValue("전체 제품수");
+	    percentHeaderRow.createCell(3).setCellValue("위반 제품수");
+	    
+	    // Data rows for percentDto
+	    for (percentDto percent : percentArray) {
+	        Row row = percentSheet.createRow(rowNum++);
+	        row.createCell(0).setCellValue(percent.getShoppingMall());
+	        row.createCell(1).setCellValue(percent.getPercent());
+	        row.createCell(2).setCellValue(percent.getDenominator());
+	        row.createCell(3).setCellValue(percent.getNumerator());
+	    }
+	
+	    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	    workbook.write(baos);
+	    workbook.close();
+	
+	    return baos;
+	}
+	
     
     private ArrayList<percentDto> analizePercent(ArrayList<CrawlingDto> target){
 		HashSet<String> set = new HashSet<>();

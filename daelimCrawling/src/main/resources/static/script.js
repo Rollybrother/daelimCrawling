@@ -488,16 +488,9 @@ function retrySearch() {
 function sortAsc() {
     const rows = $('#searchedDataTable tbody tr').get();
     rows.sort(function(a, b) {
-        const A = $(a).children('td').eq(1).text().toUpperCase();
-        const B = $(b).children('td').eq(1).text().toUpperCase();
-
-        if (A < B) {
-            return -1;
-        }
-        if (A > B) {
-            return 1;
-        }
-        return 0;
+        const priceA = parseInt($(a).find('.searchedPrice').data('price'));
+        const priceB = parseInt($(b).find('.searchedPrice').data('price'));
+        return priceA - priceB;
     });
 
     $.each(rows, function(index, row) {
@@ -509,16 +502,9 @@ function sortAsc() {
 function sortDesc() {
     const rows = $('#searchedDataTable tbody tr').get();
     rows.sort(function(a, b) {
-        const A = $(a).children('td').eq(1).text().toUpperCase();
-        const B = $(b).children('td').eq(1).text().toUpperCase();
-
-        if (A < B) {
-            return 1;
-        }
-        if (A > B) {
-            return -1;
-        }
-        return 0;
+        const priceA = parseInt($(a).find('.searchedPrice').data('price'));
+        const priceB = parseInt($(b).find('.searchedPrice').data('price'));
+        return priceB - priceA;
     });
 
     $.each(rows, function(index, row) {
@@ -677,7 +663,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
 $(document).ready(function() {
-	
  	// 모달 닫기 버튼에 이벤트 리스너 추가
     $('#closeModalButton').on('click', function () {
         $('#sellerDetailModal').modal('hide');
@@ -745,13 +730,6 @@ $(document).ready(function() {
         $('#coupangSearch').prop('checked', true);
     }
 
-    // 선택된 인덱스 설정
-    selectedIndices.forEach(function(index) {
-        $('td.clickable').filter(function() {
-            return $(this).text() == index;
-        }).closest('tr').find('.rowCheckbox').prop('checked', true);
-    });
-
     // 자동 감시 토글 및 주기 설정
     if (autoSearchEnabled) {
         $('#autoSearchToggle').prop('checked', true);
@@ -785,5 +763,14 @@ $(document).ready(function() {
     $('#sortAscButton').click(sortAsc);
     $('#sortDescButton').click(sortDesc);
     $('#searchButton').click(applySearchFilter);
+
+    // 선택된 인덱스 설정
+    selectedIndices.forEach(function(index) {
+        $('td.clickable').filter(function() {
+            return $(this).text() == index;
+        }).closest('tr').find('.rowCheckbox').prop('checked', true);
+    });
+
+    
 });
 

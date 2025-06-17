@@ -121,6 +121,8 @@ public class CompetitorService {
 	    }
 	    return false;
 	}
+	
+	
 	public ArrayList<CrawlingDto> searchCoupang(String target,String competitorName) {
 	    // 1. 웹 드라이버 설정
 	    System.setProperty("webdriver.chrome.driver", "C:\\CrawlingProject\\driver\\chromedriver.exe");
